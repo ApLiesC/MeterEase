@@ -8,12 +8,9 @@ import lombok.Data;
 public class AuthResponse {
 
     private Long managerId;
-
     private String fullName;
-
     private String emailAddress;
-
-    // JWT will be added later
-    private String token;
-
+    private String accessToken;
+    private String tokenType;
+    private long expiresIn;
 }
