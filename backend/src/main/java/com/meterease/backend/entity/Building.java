@@ -17,8 +17,9 @@ public class Building {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer buildingId;
 
-    @Column(nullable = false)
-    private Integer managerId;
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(name = "manager_id", nullable = false)
+    private Manager manager;
 
     @NotBlank
     @Column(nullable = false)

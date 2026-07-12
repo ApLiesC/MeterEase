@@ -8,7 +8,7 @@ import lombok.Data;
 @Builder
 public class ManagerResponse {
 
-    private Long managerId;
+    private Integer managerId;
 
     private String fullName;
 

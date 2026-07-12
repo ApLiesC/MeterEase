@@ -9,12 +9,13 @@ import lombok.Setter;
 public class BuildingDTO {
 
     private Integer buildingId;
-    private Integer managerId; //remove when we have authentication
 
-    @NotBlank
+    // Returned by the backend; not required in create/update requests.
+    private Integer managerId;
+
+    @NotBlank(message = "Building name is required")
     private String buildingName;
 
-    @NotBlank
+    @NotBlank(message = "Address is required")
     private String address;
-
 }
