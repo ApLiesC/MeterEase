@@ -1,8 +1,9 @@
 package com.meterease.backend.dto;
 
+import com.meterease.backend.enums.RoomNamePattern;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.DecimalMin;
-import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
 import lombok.Setter;
@@ -13,17 +14,23 @@ import java.util.List;
 
 @Getter
 @Setter
-public class RoomDTO {
-
-    private Integer roomId;
+public class GenerateRoomsRequest {
 
     @NotNull(message = "Building is required")
     private Integer buildingId;
 
-    private Integer tenantId;
+    @NotNull(message = "Number of rooms is required")
+    @Min(value = 1, message = "At least one room must be created")
+    private Integer numberOfRooms;
 
-    @NotBlank(message = "Room name is required")
-    private String roomName;
+    @NotNull(message = "Room naming pattern is required")
+    private RoomNamePattern roomNamePattern;
+
+    private String prefix;
+
+    @NotNull(message = "Starting number is required")
+    @Min(value = 1, message = "Starting number must be at least 1")
+    private Integer startingNumber;
 
     @NotNull(message = "Rent amount is required")
     @DecimalMin(

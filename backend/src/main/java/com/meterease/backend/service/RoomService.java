@@ -1,17 +1,35 @@
 package com.meterease.backend.service;
 
+import com.meterease.backend.dto.GenerateRoomsRequest;
 import com.meterease.backend.dto.RoomDTO;
 
 import java.util.List;
 
 public interface RoomService {
 
-    RoomDTO createRoom(RoomDTO roomDTO);
+    RoomDTO createRoom(
+            String managerEmail,
+            RoomDTO roomDTO
+    );
 
-    List<RoomDTO> getRooms(Integer buildingId);
+    List<RoomDTO> generateRooms(
+            String managerEmail,
+            GenerateRoomsRequest request
+    );
 
-    RoomDTO updateRoom(Integer roomId, RoomDTO roomDTO);
+    List<RoomDTO> getRooms(
+            String managerEmail,
+            Integer buildingId
+    );
 
-    void deleteRoom(Integer roomId);
+    RoomDTO updateRoom(
+            String managerEmail,
+            Integer roomId,
+            RoomDTO roomDTO
+    );
 
+    void deleteRoom(
+            String managerEmail,
+            Integer roomId
+    );
 }
