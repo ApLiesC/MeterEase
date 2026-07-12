@@ -1,4 +1,4 @@
-package com.meterease.backend.repository;
+package com.meterease.backend.security;
 
 public class CustomUserDetailsService {
 

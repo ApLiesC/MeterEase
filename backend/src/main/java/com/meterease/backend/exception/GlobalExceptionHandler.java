@@ -1,4 +1,4 @@
-package com.meterease.backend.entity;
+package com.meterease.backend.exception;
 
 public class GlobalExceptionHandler {
 
