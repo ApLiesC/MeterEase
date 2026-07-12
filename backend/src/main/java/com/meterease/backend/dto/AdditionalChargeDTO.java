@@ -7,25 +7,19 @@ import lombok.Getter;
 import lombok.Setter;
 
 import java.math.BigDecimal;
-import java.util.List;
 
 @Getter
 @Setter
-public class RoomDTO {
+public class AdditionalChargeDTO {
+
+    private Integer additionalChargeId;
 
     private Integer roomId;
 
-    @NotNull
-    private Integer buildingId;
-
-    private Integer tenantId;
-
     @NotBlank
-    private String roomName;
+    private String chargeName;
 
     @NotNull
     @DecimalMin(value = "0.0")
-    private BigDecimal rentAmount;
-
-    private List<AdditionalChargeDTO> additionalCharges;
+    private BigDecimal chargeAmount;
 }

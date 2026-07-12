@@ -6,6 +6,8 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.math.BigDecimal;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Table(name = "rooms")
@@ -29,4 +31,11 @@ public class Room {
 
     @Column(nullable = false)
     private BigDecimal rentAmount;
+
+    @OneToMany(
+            mappedBy = "room",
+            cascade = CascadeType.ALL,
+            orphanRemoval = true
+    )
+    private List<AdditionalCharge> additionalCharges = new ArrayList<>();
 }

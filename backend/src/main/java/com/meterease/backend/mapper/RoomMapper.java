@@ -14,6 +14,12 @@ public class RoomMapper {
         dto.setTenantId(room.getTenantId());
         dto.setRoomName(room.getRoomName());
         dto.setRentAmount(room.getRentAmount());
+        dto.setAdditionalCharges(
+            room.getAdditionalCharges()
+                .stream()
+                .map(AdditionalChargeMapper::toDTO)
+                .toList()
+        );
 
         return dto;
     }
