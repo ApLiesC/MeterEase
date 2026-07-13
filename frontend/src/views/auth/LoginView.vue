@@ -61,6 +61,10 @@ async function submitLogin() {
       <button type="submit" :disabled="authStore.loading">
         {{ authStore.loading ? 'Logging in...' : 'Login' }}
       </button>
+      <p>
+  Don't have an account?
+  <RouterLink to="/register">Register</RouterLink>
+</p>
     </form>
   </main>
 </template>
