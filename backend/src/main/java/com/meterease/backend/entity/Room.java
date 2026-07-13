@@ -33,9 +33,15 @@ public class Room {
     private BigDecimal rentAmount;
 
     @OneToMany(
-            mappedBy = "room",
-            cascade = CascadeType.ALL,
-            orphanRemoval = true
+        mappedBy = "room",
+        cascade = CascadeType.ALL,
+        orphanRemoval = true
     )
     private List<AdditionalCharge> additionalCharges = new ArrayList<>();
+
+    @OneToMany(
+        mappedBy = "room",
+        cascade = CascadeType.ALL
+    )
+    private List<MeterReading> meterReadings;
 }
