@@ -20,6 +20,7 @@ const mode = ref<RoomMode>('single')
 
 <template>
   <div class="modal-backdrop">
+
     <div class="modal">
 
       <header class="modal-header">
@@ -27,29 +28,32 @@ const mode = ref<RoomMode>('single')
 
         <button
           class="close"
+          type="button"
           @click="emit('close')"
         >
           ✕
         </button>
       </header>
 
+
       <div class="mode-picker">
 
         <label>
           <input
+            v-model="mode"
             type="radio"
             value="single"
-            v-model="mode"
           />
 
           Single Room
         </label>
 
+
         <label>
           <input
+            v-model="mode"
             type="radio"
             value="multiple"
-            v-model="mode"
           />
 
           Multiple Rooms
@@ -57,11 +61,13 @@ const mode = ref<RoomMode>('single')
 
       </div>
 
+
       <SingleRoomForm
-  v-if="mode === 'single'"
-  :building-id="buildingId"
-  @created="emit('created')"
-/>
+        v-if="mode === 'single'"
+        :building-id="buildingId"
+        @created="emit('created')"
+      />
+
 
       <MultipleRoomForm
         v-else
@@ -70,5 +76,71 @@ const mode = ref<RoomMode>('single')
       />
 
     </div>
+
   </div>
 </template>
+
+
+<style scoped>
+
+.modal-backdrop {
+  position: fixed;
+  inset: 0;
+
+  background: rgba(0, 0, 0, 0.4);
+
+  display: flex;
+  justify-content: center;
+  align-items: center;
+
+  z-index: 1000;
+}
+
+
+.modal {
+  width: 500px;
+  max-height: 90vh;
+
+  overflow-y: auto;
+
+  background: white;
+
+  border-radius: 10px;
+
+  padding: 24px;
+
+  z-index: 1001;
+}
+
+
+.modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+
+  margin-bottom: 20px;
+}
+
+
+.close {
+  border: none;
+  background: transparent;
+
+  font-size: 20px;
+  cursor: pointer;
+}
+
+
+.mode-picker {
+  display: flex;
+  gap: 20px;
+
+  margin-bottom: 20px;
+}
+
+
+label {
+  cursor: pointer;
+}
+
+</style>
