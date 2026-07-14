@@ -43,6 +43,17 @@ const router = createRouter({
     requiresAuth: true,
   },
 },
+{
+  path: '/meter-readings',
+  name: 'meter-readings',
+  component: () =>
+    import(
+      '@/views/meter-readings/MeterReadingsView.vue'
+    ),
+  meta: {
+    requiresAuth: true,
+  },
+},
   ],
 })
 

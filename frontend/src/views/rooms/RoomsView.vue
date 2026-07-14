@@ -144,7 +144,9 @@ onMounted(async () => {
         <RouterLink to="/buildings">
           Buildings
         </RouterLink>
-
+<RouterLink to="/meter-readings">
+  Meter Readings
+</RouterLink>
         <button
           type="button"
           @click="logout"
