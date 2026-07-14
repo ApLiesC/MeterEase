@@ -4,8 +4,6 @@ import { ref } from 'vue'
 import { updateRoom } from '@/services/roomService'
 import type { AdditionalCharge, Room } from '@/types/room'
 
-import AdditionalChargesTable from './AdditionalChargesTable.vue'
-
 const props = defineProps<{
   room: Room
 }>()
@@ -30,6 +28,17 @@ const additionalCharges = ref<AdditionalCharge[]>(
 const loading = ref(false)
 const errorMessage = ref('')
 
+function addCharge(): void {
+  additionalCharges.value.push({
+    chargeName: '',
+    chargeAmount: 0,
+  })
+}
+
+function removeCharge(index: number): void {
+  additionalCharges.value.splice(index, 1)
+}
+
 async function submitUpdate(): Promise<void> {
   errorMessage.value = ''
 
@@ -47,18 +56,6 @@ async function submitUpdate(): Promise<void> {
     return
   }
 
-  const invalidCharge = additionalCharges.value.some(
-    (charge) =>
-      !charge.chargeName.trim() ||
-      charge.chargeAmount < 0,
-  )
-
-  if (invalidCharge) {
-    errorMessage.value =
-      'Each additional charge must have a name and valid amount.'
-    return
-  }
-
   if (props.room.roomId === undefined) {
     errorMessage.value = 'Room ID is missing.'
     return
@@ -72,11 +69,8 @@ async function submitUpdate(): Promise<void> {
     rentAmount: rentAmount.value,
     additionalCharges:
       additionalCharges.value.map((charge) => ({
-        additionalChargeId:
-          charge.additionalChargeId,
-        roomId: charge.roomId,
+        ...charge,
         chargeName: charge.chargeName.trim(),
-        chargeAmount: charge.chargeAmount,
       })),
   }
 
@@ -102,66 +96,157 @@ async function submitUpdate(): Promise<void> {
 
 <template>
   <div
-    class="modal-backdrop"
+    class="fixed inset-0 z-50 grid place-items-center bg-black/40 p-4"
     @click.self="emit('close')"
   >
-    <section class="modal">
-      <header class="modal-header">
-        <h2>Edit Room</h2>
+    <section
+      class="w-full max-w-2xl rounded-md border border-black bg-neutral-100 p-4 font-mono"
+    >
+
+      <!-- Header -->
+      <header
+        class="mb-4 flex items-center justify-between border-b border-black pb-3"
+      >
+        <h2
+          class="text-lg font-bold uppercase tracking-wider"
+        >
+          Edit Room
+        </h2>
 
         <button
           type="button"
-          class="close-button"
-          aria-label="Close"
+          class="rounded-sm border border-black px-2 py-1 text-sm transition hover:bg-black hover:text-white"
           @click="emit('close')"
         >
           ×
         </button>
       </header>
 
-      <form @submit.prevent="submitUpdate">
-        <div class="form-group">
-          <label for="editRoomName">
-            Room Name
-          </label>
 
-          <input
-            id="editRoomName"
-            v-model="roomName"
-            type="text"
-            required
-          />
-        </div>
+      <form
+        class="space-y-4"
+        @submit.prevent="submitUpdate"
+      >
 
-        <div class="form-group">
-          <label for="editRentAmount">
-            Rent Amount
-          </label>
+        <!-- Room Information -->
+        <section
+          class="grid gap-3 sm:grid-cols-[1fr_160px]"
+        >
+          <div>
+            <label class="mb-1 block text-xs text-gray-600">
+              Room Name
+            </label>
 
-          <input
-            id="editRentAmount"
-            v-model.number="rentAmount"
-            type="number"
-            min="0"
-            step="0.01"
-            required
-          />
-        </div>
+            <input
+              v-model="roomName"
+              type="text"
+              required
+              class="h-10 w-full rounded-sm border border-black bg-white px-3 text-sm outline-none focus:ring-1 focus:ring-black"
+            />
+          </div>
 
-        <AdditionalChargesTable
-          v-model:charges="additionalCharges"
-        />
+          <div>
+            <label class="mb-1 block text-xs text-gray-600">
+              Rent Amount
+            </label>
+
+            <input
+              v-model.number="rentAmount"
+              type="number"
+              min="0"
+              step="0.01"
+              required
+              class="h-10 w-full rounded-sm border border-black bg-white px-3 text-sm outline-none focus:ring-1 focus:ring-black"
+            />
+          </div>
+        </section>
+
+
+        <!-- Charges -->
+        <section
+          class="border-t border-black pt-3"
+        >
+          <div class="mb-2">
+            <h3
+              class="text-sm font-bold uppercase"
+            >
+              Additional Charges
+            </h3>
+
+            <p class="text-xs text-gray-600">
+              Optional monthly fees
+            </p>
+          </div>
+
+
+          <div
+            v-if="additionalCharges.length"
+            class="space-y-2"
+          >
+            <div
+              v-for="(charge, index) in additionalCharges"
+              :key="index"
+              class="grid grid-cols-[1fr_120px_36px] gap-2"
+            >
+              <input
+                v-model="charge.chargeName"
+                type="text"
+                placeholder="Charge name"
+                class="h-10 w-full rounded-sm border border-black bg-white px-3 text-sm outline-none focus:ring-1 focus:ring-black"
+              />
+
+              <input
+                v-model.number="charge.chargeAmount"
+                type="number"
+                min="0"
+                step="0.01"
+                placeholder="0.00"
+                class="h-10 w-full rounded-sm border border-black bg-white px-3 text-sm outline-none focus:ring-1 focus:ring-black"
+              />
+
+              <button
+                type="button"
+                class="h-10 rounded-sm border border-red-700 text-sm text-red-700 transition hover:bg-red-700 hover:text-white"
+                @click="removeCharge(index)"
+              >
+                ×
+              </button>
+            </div>
+          </div>
+
+          <p
+            v-else
+            class="text-xs text-gray-600"
+          >
+            No additional charges.
+          </p>
+
+
+          <button
+            type="button"
+            class="mt-3 rounded-sm border border-black px-3 py-2 text-xs transition hover:bg-black hover:text-white"
+            @click="addCharge"
+          >
+            + Add Charge
+          </button>
+        </section>
+
 
         <p
           v-if="errorMessage"
-          class="error-message"
+          class="border border-red-700 p-2 text-xs text-red-700"
         >
           {{ errorMessage }}
         </p>
 
-        <footer class="modal-actions">
+
+        <!-- Actions -->
+        <footer
+          class="flex justify-end gap-2 border-t border-black pt-3"
+        >
           <button
             type="button"
+            class="rounded-sm border border-black px-5 py-2 text-sm transition hover:bg-neutral-200"
             @click="emit('close')"
           >
             Cancel
@@ -170,6 +255,7 @@ async function submitUpdate(): Promise<void> {
           <button
             type="submit"
             :disabled="loading"
+            class="rounded-sm border border-black bg-black px-5 py-2 text-sm text-white transition hover:bg-white hover:text-black disabled:cursor-not-allowed disabled:opacity-50"
           >
             {{
               loading
@@ -178,81 +264,8 @@ async function submitUpdate(): Promise<void> {
             }}
           </button>
         </footer>
+
       </form>
     </section>
   </div>
 </template>
-
-<style scoped>
-.modal-backdrop {
-  position: fixed;
-  inset: 0;
-  z-index: 1000;
-  display: grid;
-  place-items: center;
-  padding: 1rem;
-  background: rgba(0, 0, 0, 0.45);
-}
-
-.modal {
-  width: 100%;
-  max-width: 600px;
-  max-height: 90vh;
-  overflow-y: auto;
-  padding: 1.5rem;
-  background: white;
-  border-radius: 10px;
-}
-
-.modal-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  margin-bottom: 1.25rem;
-}
-
-.modal-header h2 {
-  margin: 0;
-}
-
-.close-button {
-  border: none;
-  background: transparent;
-  font-size: 1.5rem;
-  cursor: pointer;
-}
-
-.form-group {
-  display: flex;
-  flex-direction: column;
-  gap: 0.4rem;
-  margin-bottom: 1rem;
-}
-
-.form-group input {
-  width: 100%;
-  box-sizing: border-box;
-  padding: 0.7rem;
-}
-
-.modal-actions {
-  display: flex;
-  justify-content: flex-end;
-  gap: 0.75rem;
-  margin-top: 1.5rem;
-}
-
-.modal-actions button {
-  padding: 0.7rem 1rem;
-  cursor: pointer;
-}
-
-.modal-actions button:disabled {
-  cursor: not-allowed;
-  opacity: 0.6;
-}
-
-.error-message {
-  color: #b00020;
-}
-</style>

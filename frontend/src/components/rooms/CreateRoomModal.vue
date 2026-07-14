@@ -19,128 +19,111 @@ const mode = ref<RoomMode>('single')
 </script>
 
 <template>
-  <div class="modal-backdrop">
+  <div
+    class="fixed inset-0 z-50 grid place-items-center bg-black/40 p-4"
+    @click.self="emit('close')"
+  >
 
-    <div class="modal">
+    <section
+      class="flex max-h-[85vh] w-full max-w-xl flex-col rounded-md border border-black bg-neutral-100 p-4 font-mono"
+    >
 
-      <header class="modal-header">
-        <h2>Create Room</h2>
+      <!-- Header -->
+      <header
+        class="mb-4 flex shrink-0 items-center justify-between border-b border-black pb-3"
+      >
+        <div>
+          <h2
+            class="text-lg font-bold uppercase tracking-wider"
+          >
+            Create Room
+          </h2>
+
+          <p
+            class="text-xs text-gray-600"
+          >
+            Add a new room to this building
+          </p>
+        </div>
+
 
         <button
-          class="close"
           type="button"
+          class="rounded-sm border border-black px-2 py-1 text-sm transition hover:bg-black hover:text-white"
           @click="emit('close')"
         >
-          ✕
+          ×
         </button>
+
       </header>
 
 
-      <div class="mode-picker">
+      <!-- Mode Selection -->
+      <section
+        class="mb-4 grid shrink-0 grid-cols-2 gap-2"
+      >
 
-        <label>
+        <label
+          class="cursor-pointer"
+        >
           <input
             v-model="mode"
             type="radio"
             value="single"
+            class="peer hidden"
           />
 
-          Single Room
+          <div
+            class="rounded-sm border border-black px-3 py-2 text-center text-sm transition peer-checked:bg-black peer-checked:text-white"
+          >
+            Single Room
+          </div>
+
         </label>
 
 
-        <label>
+        <label
+          class="cursor-pointer"
+        >
           <input
             v-model="mode"
             type="radio"
             value="multiple"
+            class="peer hidden"
           />
 
-          Multiple Rooms
+          <div
+            class="rounded-sm border border-black px-3 py-2 text-center text-sm transition peer-checked:bg-black peer-checked:text-white"
+          >
+            Multiple Rooms
+          </div>
+
         </label>
+
+      </section>
+
+
+      <!-- Scrollable Form Area -->
+      <div
+        class="min-h-0 overflow-y-auto pr-1"
+      >
+
+        <SingleRoomForm
+          v-if="mode === 'single'"
+          :building-id="buildingId"
+          @created="emit('created')"
+        />
+
+
+        <MultipleRoomForm
+          v-else
+          :building-id="buildingId"
+          @created="emit('created')"
+        />
 
       </div>
 
-
-      <SingleRoomForm
-        v-if="mode === 'single'"
-        :building-id="buildingId"
-        @created="emit('created')"
-      />
-
-
-      <MultipleRoomForm
-        v-else
-        :building-id="buildingId"
-        @created="emit('created')"
-      />
-
-    </div>
+    </section>
 
   </div>
 </template>
-
-
-<style scoped>
-
-.modal-backdrop {
-  position: fixed;
-  inset: 0;
-
-  background: rgba(0, 0, 0, 0.4);
-
-  display: flex;
-  justify-content: center;
-  align-items: center;
-
-  z-index: 1000;
-}
-
-
-.modal {
-  width: 500px;
-  max-height: 90vh;
-
-  overflow-y: auto;
-
-  background: white;
-
-  border-radius: 10px;
-
-  padding: 24px;
-
-  z-index: 1001;
-}
-
-
-.modal-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-
-  margin-bottom: 20px;
-}
-
-
-.close {
-  border: none;
-  background: transparent;
-
-  font-size: 20px;
-  cursor: pointer;
-}
-
-
-.mode-picker {
-  display: flex;
-  gap: 20px;
-
-  margin-bottom: 20px;
-}
-
-
-label {
-  cursor: pointer;
-}
-
-</style>

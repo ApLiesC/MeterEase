@@ -5,7 +5,7 @@ import { useAuthStore } from '@/stores/auth'
 const router = useRouter()
 const authStore = useAuthStore()
 
-async function logout() {
+async function logout(): Promise<void> {
   authStore.logout()
 
   await router.push({
@@ -15,104 +15,61 @@ async function logout() {
 </script>
 
 <template>
-  <header class="navbar">
-
-    <div class="left">
-
-      <RouterLink
-        to="/buildings"
-        class="logo"
+  <header
+    class="border-b border-black bg-neutral-100 px-4 py-4 font-mono uppercase tracking-wider sm:px-8"
+  >
+    <div
+      class="mx-auto flex max-w-5xl flex-col gap-4 sm:flex-row sm:items-center sm:justify-between"
+    >
+      <!-- Left -->
+      <div
+        class="flex flex-col gap-3 sm:flex-row sm:items-center sm:gap-8"
       >
-        MeterEase
-      </RouterLink>
-
-      <nav>
-
         <RouterLink
           to="/buildings"
-          class="nav-link"
+          class="text-xl font-bold tracking-widest"
         >
-          Buildings
+          MeterEase
         </RouterLink>
 
-        <RouterLink
-          to="/rooms"
-          class="nav-link"
+        <nav
+          class="flex flex-wrap gap-2"
         >
-          Rooms
-        </RouterLink>
+          <RouterLink
+            to="/buildings"
+            class="rounded-sm border border-transparent px-3 py-1 text-sm transition hover:border-black"
+          >
+            Buildings
+          </RouterLink>
 
-      </nav>
+          <RouterLink
+            to="/rooms"
+            class="rounded-sm border border-transparent px-3 py-1 text-sm transition hover:border-black"
+          >
+            Rooms
+          </RouterLink>
+        </nav>
+      </div>
 
-    </div>
-
-
-    <div class="right">
-
-      <span
-        v-if="authStore.manager"
-        class="manager-name"
+      <!-- Right -->
+      <div
+        class="flex items-center justify-between gap-3 sm:justify-end"
       >
-        {{ authStore.manager.fullName }}
-      </span>
+        <span
+          v-if="authStore.manager"
+          class="text-xs text-gray-600"
+        >
+          {{ authStore.manager.fullName }}
+        </span>
 
-      <button
-        type="button"
-        @click="logout"
-      >
-        Logout
-      </button>
-
+        <button
+          type="button"
+          class="rounded-sm border border-black px-4 py-2 text-sm font-semibold transition hover:bg-black hover:text-white"
+          @click="logout"
+        >
+          Logout
+        </button>
+      </div>
     </div>
-
   </header>
 </template>
-
-<style scoped>
-.navbar {
-  display:flex;
-  justify-content:space-between;
-  align-items:center;
-  padding:1rem 2rem;
-  border-bottom:1px solid #ddd;
-  background:white;
-}
-
-.left {
-  display:flex;
-  align-items:center;
-  gap:2rem;
-}
-
-nav {
-  display:flex;
-  gap:1rem;
-}
-
-.logo {
-  font-size:1.2rem;
-  font-weight:bold;
-  color:inherit;
-  text-decoration:none;
-}
-
-.nav-link {
-  color:inherit;
-  text-decoration:none;
-}
-
-.router-link-active {
-  font-weight:bold;
-}
-
-.right {
-  display:flex;
-  align-items:center;
-  gap:1rem;
-}
-
-button {
-  cursor:pointer;
-  padding:.6rem 1rem;
-}
-</style>

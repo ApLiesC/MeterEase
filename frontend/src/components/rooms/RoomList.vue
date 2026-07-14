@@ -13,22 +13,16 @@ const emit = defineEmits<{
 </script>
 
 <template>
-  <section class="room-grid">
+  <section
+    class="grid items-start gap-4 sm:grid-cols-2 lg:grid-cols-3"
+  >
     <RoomCard
       v-for="room in rooms"
       :key="room.roomId"
       :room="room"
+      class="h-fit"
       @edit="emit('edit', $event)"
       @delete="emit('delete', $event)"
     />
   </section>
 </template>
-
-<style scoped>
-.room-grid {
-  display: grid;
-  grid-template-columns:
-    repeat(auto-fit, minmax(220px, 1fr));
-  gap: 1rem;
-}
-</style>

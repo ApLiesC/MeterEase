@@ -15,7 +15,6 @@ import {
 import type { Building } from '@/types/building'
 import type { Room } from '@/types/room'
 
-
 const buildings = ref<Building[]>([])
 const rooms = ref<Room[]>([])
 
@@ -30,7 +29,6 @@ const showEditRoomModal = ref(false)
 const errorMessage = ref('')
 
 const selectedRoom = ref<Room | null>(null)
-
 
 async function loadBuildings(): Promise<void> {
   loadingBuildings.value = true
@@ -57,7 +55,6 @@ async function loadBuildings(): Promise<void> {
   }
 }
 
-
 async function loadRooms(): Promise<void> {
   if (selectedBuildingId.value === null) {
     rooms.value = []
@@ -83,24 +80,20 @@ async function loadRooms(): Promise<void> {
   }
 }
 
-
 function openEditRoom(room: Room): void {
   selectedRoom.value = room
   showEditRoomModal.value = true
 }
-
 
 function closeEditRoom(): void {
   showEditRoomModal.value = false
   selectedRoom.value = null
 }
 
-
 async function handleRoomUpdated(): Promise<void> {
   closeEditRoom()
   await loadRooms()
 }
-
 
 async function removeRoom(roomId: number): Promise<void> {
   if (!confirm('Delete this room?')) {
@@ -120,65 +113,73 @@ async function removeRoom(roomId: number): Promise<void> {
   }
 }
 
-
 async function handleRoomCreated(): Promise<void> {
   showCreateRoomModal.value = false
   await loadRooms()
 }
-
 
 watch(
   selectedBuildingId,
   loadRooms,
 )
 
-
 onMounted(async () => {
   await loadBuildings()
 })
 </script>
 
-
 <template>
   <AppNavBar />
 
-  <main class="rooms-page">
+  <main
+    class="mx-auto max-w-5xl p-4 font-mono uppercase tracking-wider"
+  >
+    <!-- Page Header -->
+    <header
+      class="mb-8 flex flex-col gap-3 border-b border-black pb-5 sm:flex-row sm:items-center sm:justify-between"
+    >
+      <div>
+        <h1 class="text-3xl font-bold">
+          Rooms
+        </h1>
 
-    <header class="page-header">
-      <h1>
-        Rooms
-      </h1>
+        <p class="mt-1 text-xs text-gray-500">
+          Manage room information and charges
+        </p>
+      </div>
     </header>
 
-
+    <!-- Error -->
     <p
       v-if="errorMessage"
-      class="error-message"
+      class="mb-5 rounded-sm border border-black bg-neutral-100 p-3 text-sm text-red-600"
     >
       {{ errorMessage }}
     </p>
 
-
-    <section class="building-selection">
-
-      <label for="building">
-        Select building
+    <!-- Controls -->
+    <section
+      class="mb-8 flex flex-col gap-4 rounded-md border border-black bg-neutral-100 p-4 sm:flex-row sm:items-center"
+    >
+      <label
+        for="building"
+        class="text-sm font-semibold"
+      >
+        Select Building
       </label>
-
 
       <select
         id="building"
         v-model="selectedBuildingId"
         :disabled="loadingBuildings"
+        class="w-full rounded-sm border border-black bg-neutral-100 px-3 py-2 text-sm outline-none transition hover:bg-white sm:w-auto"
       >
-
         <option
           :value="null"
           disabled
         >
           Select a building
         </option>
-
 
         <option
           v-for="building in buildings"
@@ -187,36 +188,38 @@ onMounted(async () => {
         >
           {{ building.buildingName }}
         </option>
-
       </select>
-
 
       <button
         type="button"
         :disabled="selectedBuildingId === null"
+        class="rounded-sm border border-black px-4 py-2 text-sm font-semibold transition hover:bg-black hover:text-white disabled:cursor-not-allowed disabled:border-gray-400 disabled:text-gray-400"
         @click="showCreateRoomModal = true"
       >
         + Create Room
       </button>
-
     </section>
 
-
-    <p v-if="loadingRooms">
+    <!-- Loading -->
+    <p
+      v-if="loadingRooms"
+      class="border border-black p-4 text-sm text-gray-600"
+    >
       Loading rooms...
     </p>
 
-
+    <!-- Empty -->
     <p
       v-else-if="
         selectedBuildingId !== null &&
         rooms.length === 0
       "
+      class="border border-black p-4 text-sm text-gray-500"
     >
       No rooms found in this building.
     </p>
 
-
+    <!-- Room Cards -->
     <RoomList
       v-else
       :rooms="rooms"
@@ -224,7 +227,7 @@ onMounted(async () => {
       @delete="removeRoom"
     />
 
-
+    <!-- Modals -->
     <CreateRoomModal
       v-if="
         showCreateRoomModal &&
@@ -235,7 +238,6 @@ onMounted(async () => {
       @created="handleRoomCreated"
     />
 
-
     <EditRoomModal
       v-if="
         showEditRoomModal &&
@@ -245,41 +247,5 @@ onMounted(async () => {
       @close="closeEditRoom"
       @updated="handleRoomUpdated"
     />
-
   </main>
 </template>
-
-
-<style scoped>
-
-.rooms-page {
-  max-width: 1000px;
-  margin: 2rem auto;
-  padding: 1rem;
-}
-
-
-.page-header,
-.building-selection {
-  display: flex;
-  align-items: center;
-  gap: 1rem;
-}
-
-
-.page-header {
-  justify-content: space-between;
-  margin-bottom: 2rem;
-}
-
-
-.building-selection {
-  margin-bottom: 2rem;
-}
-
-
-.error-message {
-  color: #b00020;
-}
-
-</style>

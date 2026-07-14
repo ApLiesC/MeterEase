@@ -9,8 +9,6 @@ import type {
   RoomNamePattern,
 } from '@/types/room'
 
-import AdditionalChargesTable from './AdditionalChargesTable.vue'
-
 const props = defineProps<{
   buildingId: number
 }>()
@@ -20,12 +18,15 @@ const emit = defineEmits<{
 }>()
 
 const numberOfRooms = ref<number | null>(null)
+const startingNumber = ref<number | null>(null)
+
 const roomNamePattern = ref<RoomNamePattern>(
   'PREFIX_AND_NUMBER',
 )
+
 const prefix = ref('')
-const startingNumber = ref<number | null>(null)
 const rentAmount = ref<number | null>(null)
+
 const additionalCharges = ref<AdditionalCharge[]>([])
 
 const loading = ref(false)
@@ -40,34 +41,40 @@ const prefixRequired = computed(
 const generatedPreview = computed(() => {
   if (
     numberOfRooms.value === null ||
-    numberOfRooms.value < 1 ||
     startingNumber.value === null
   ) {
     return []
   }
 
-  const previewCount = Math.min(
-    numberOfRooms.value,
-    5,
-  )
-
   return Array.from(
-    { length: previewCount },
+    {
+      length: Math.min(
+        numberOfRooms.value,
+        5,
+      ),
+    },
     (_, index) => {
-      const currentNumber =
+      const number =
         startingNumber.value! + index
 
-      if (
-        roomNamePattern.value ===
+      return roomNamePattern.value ===
         'NUMBER_ONLY'
-      ) {
-        return String(currentNumber)
-      }
-
-      return `${prefix.value.trim()}${currentNumber}`
+        ? String(number)
+        : `${prefix.value}${number}`
     },
   )
 })
+
+function addCharge(): void {
+  additionalCharges.value.push({
+    chargeName: '',
+    chargeAmount: 0,
+  })
+}
+
+function removeCharge(index: number): void {
+  additionalCharges.value.splice(index, 1)
+}
 
 async function submitMultipleRooms(): Promise<void> {
   errorMessage.value = ''
@@ -95,7 +102,7 @@ async function submitMultipleRooms(): Promise<void> {
     !prefix.value.trim()
   ) {
     errorMessage.value =
-      'Prefix is required for Prefix + Number.'
+      'Prefix is required.'
     return
   }
 
@@ -108,27 +115,16 @@ async function submitMultipleRooms(): Promise<void> {
     return
   }
 
-  const invalidCharge =
-    additionalCharges.value.some(
-      (charge) =>
-        !charge.chargeName.trim() ||
-        charge.chargeAmount < 0,
-    )
-
-  if (invalidCharge) {
-    errorMessage.value =
-      'Each additional charge must have a name and a valid amount.'
-    return
-  }
-
   const request: GenerateRoomsRequest = {
     buildingId: props.buildingId,
-    numberOfRooms: numberOfRooms.value,
+    numberOfRooms:
+      numberOfRooms.value,
     roomNamePattern:
       roomNamePattern.value,
     startingNumber:
       startingNumber.value,
-    rentAmount: rentAmount.value,
+    rentAmount:
+      rentAmount.value,
     additionalCharges:
       additionalCharges.value.map(
         (charge) => ({
@@ -141,7 +137,8 @@ async function submitMultipleRooms(): Promise<void> {
   }
 
   if (prefixRequired.value) {
-    request.prefix = prefix.value.trim()
+    request.prefix =
+      prefix.value.trim()
   }
 
   loading.value = true
@@ -149,11 +146,13 @@ async function submitMultipleRooms(): Promise<void> {
   try {
     await generateRooms(request)
     emit('created')
+
   } catch (error) {
     errorMessage.value =
       error instanceof Error
         ? error.message
         : 'Failed to generate rooms.'
+
   } finally {
     loading.value = false
   }
@@ -161,137 +160,242 @@ async function submitMultipleRooms(): Promise<void> {
 </script>
 
 <template>
-  <form
-    class="room-form"
-    @submit.prevent="submitMultipleRooms"
+<form
+  class="flex max-h-[75vh] flex-col gap-4 overflow-hidden font-mono"
+  @submit.prevent="submitMultipleRooms"
+>
+
+    <!-- Generation Details -->
+<section
+  class="border-b border-black pb-4"
+>
+  <h3
+    class="mb-3 text-sm font-bold uppercase"
   >
-    <div class="form-group">
-      <label for="numberOfRooms">
-        Number of Rooms to Create
+    Room Generation Details
+  </h3>
+
+  <div
+    class="grid gap-3 sm:grid-cols-[100px_110px_1fr_120px]"
+  >
+
+    <!-- Number of Rooms -->
+    <div>
+      <label
+        class="mb-1 block text-xs text-gray-600"
+      >
+        Rooms
       </label>
 
       <input
-        id="numberOfRooms"
         v-model.number="numberOfRooms"
         type="number"
         min="1"
-        step="1"
         placeholder="50"
-        required
+        class="h-10 w-full rounded-sm border border-black bg-white px-3 text-sm outline-none focus:ring-1 focus:ring-black"
       />
     </div>
 
-    <fieldset class="pattern-group">
-      <legend>
-        Room Name Pattern
-      </legend>
 
-      <label>
-        <input
-          v-model="roomNamePattern"
-          type="radio"
-          value="NUMBER_ONLY"
-        />
-
-        Number Only
+    <!-- Starting Number -->
+    <div>
+      <label
+        class="mb-1 block text-xs text-gray-600"
+      >
+        Start
       </label>
 
-      <label>
-        <input
-          v-model="roomNamePattern"
-          type="radio"
-          value="PREFIX_AND_NUMBER"
-        />
+      <input
+        v-model.number="startingNumber"
+        type="number"
+        min="1"
+        placeholder="101"
+        class="h-10 w-full rounded-sm border border-black bg-white px-3 text-sm outline-none focus:ring-1 focus:ring-black"
+      />
+    </div>
 
-        Prefix + Number
+
+    <!-- Pattern -->
+    <div>
+      <label
+        class="mb-1 block text-xs text-gray-600"
+      >
+        Pattern
       </label>
-    </fieldset>
 
+      <select
+        v-model="roomNamePattern"
+        class="h-10 w-full rounded-sm border border-black bg-white px-3 text-sm outline-none focus:ring-1 focus:ring-black"
+      >
+        <option value="PREFIX_AND_NUMBER">
+          Prefix + Number
+        </option>
+
+        <option value="NUMBER_ONLY">
+          Number Only
+        </option>
+      </select>
+    </div>
+
+
+    <!-- Prefix -->
     <div
       v-if="prefixRequired"
-      class="form-group"
     >
-      <label for="prefix">
+      <label
+        class="mb-1 block text-xs text-gray-600"
+      >
         Prefix
       </label>
 
       <input
-        id="prefix"
         v-model="prefix"
         type="text"
         placeholder="A"
-        required
+        class="h-10 w-full rounded-sm border border-black bg-white px-3 text-sm outline-none focus:ring-1 focus:ring-black"
       />
     </div>
 
-    <div class="form-group">
-      <label for="startingNumber">
-        Starting Number
-      </label>
+  </div>
 
-      <input
-        id="startingNumber"
-        v-model.number="startingNumber"
-        type="number"
-        min="1"
-        step="1"
-        placeholder="101"
-        required
-      />
-    </div>
 
-    <div class="form-group">
-      <label for="multipleRentAmount">
+  <!-- Preview -->
+  <div
+    v-if="generatedPreview.length"
+    class="mt-3 border border-black bg-neutral-50 p-3"
+  >
+    <p
+      class="text-xs font-bold uppercase"
+    >
+      Room Generation Preview
+    </p>
+
+    <p
+      class="mt-1 text-sm"
+    >
+      {{ generatedPreview.join(', ') }}
+
+      <span
+        v-if="
+          numberOfRooms &&
+          numberOfRooms >
+            generatedPreview.length
+        "
+      >
+        ...
+      </span>
+    </p>
+  </div>
+
+</section>
+
+
+    <!-- Room Settings -->
+    <section
+      class="border-b border-black pb-4"
+    >
+      <h3
+        class="mb-3 text-sm font-bold uppercase"
+      >
+        Default Room Settings
+      </h3>
+
+      <label class="mb-1 block text-xs text-gray-600">
         Rent Amount
       </label>
 
       <input
-        id="multipleRentAmount"
         v-model.number="rentAmount"
         type="number"
         min="0"
         step="0.01"
-        placeholder="3500.00"
-        required
+        placeholder="3500"
+        class="h-10 w-full rounded-sm border border-black bg-white px-3 text-sm"
       />
-    </div>
-
-    <section
-      v-if="generatedPreview.length > 0"
-      class="preview"
-    >
-      <strong>Room name preview</strong>
-
-      <p>
-        {{ generatedPreview.join(', ') }}
-
-        <span
-          v-if="
-            numberOfRooms !== null &&
-            numberOfRooms >
-              generatedPreview.length
-          "
-        >
-          ...
-        </span>
-      </p>
     </section>
 
-    <AdditionalChargesTable
-      v-model:charges="additionalCharges"
-    />
+
+    <!-- Charges -->
+    <section>
+      <h3
+        class="text-sm font-bold uppercase"
+      >
+        Additional Charges
+      </h3>
+
+      <p class="mb-2 text-xs text-gray-600">
+        Applied to every generated room
+      </p>
+
+
+      <!-- Scrollable Charges List -->
+      <div
+        v-if="additionalCharges.length"
+        class="max-h-48 space-y-2 overflow-y-auto pr-1"
+      >
+        <div
+          v-for="(charge, index) in additionalCharges"
+          :key="index"
+          class="grid grid-cols-[1fr_120px_36px] gap-2"
+        >
+          <input
+            v-model="charge.chargeName"
+            placeholder="Parking"
+            class="h-10 rounded-sm border border-black bg-white px-3 text-sm outline-none focus:ring-1 focus:ring-black"
+          />
+
+          <input
+            v-model.number="charge.chargeAmount"
+            type="number"
+            min="0"
+            placeholder="0"
+            class="h-10 rounded-sm border border-black bg-white px-3 text-sm outline-none focus:ring-1 focus:ring-black"
+          />
+
+          <button
+            type="button"
+            class="h-10 rounded-sm border border-red-700 text-red-700 transition hover:bg-red-700 hover:text-white"
+            @click="removeCharge(index)"
+          >
+            ×
+          </button>
+        </div>
+      </div>
+
+
+      <p
+        v-else
+        class="text-xs text-gray-600"
+      >
+        No additional charges.
+      </p>
+
+
+      <button
+        type="button"
+        class="mt-3 rounded-sm border border-black px-3 py-2 text-xs transition hover:bg-black hover:text-white"
+        @click="addCharge"
+      >
+        + Add Charge
+      </button>
+    </section>
+
 
     <p
       v-if="errorMessage"
-      class="error-message"
+      class="border border-red-700 p-2 text-xs text-red-700"
     >
       {{ errorMessage }}
     </p>
 
-    <div class="form-actions">
+
+    <footer
+      class="flex justify-end border-t border-black pt-3"
+    >
       <button
         type="submit"
         :disabled="loading"
+        class="border border-black bg-black px-5 py-2 text-sm text-white hover:bg-white hover:text-black disabled:opacity-50"
       >
         {{
           loading
@@ -299,69 +403,7 @@ async function submitMultipleRooms(): Promise<void> {
             : 'Generate Rooms'
         }}
       </button>
-    </div>
+    </footer>
+
   </form>
 </template>
-
-<style scoped>
-.room-form {
-  display: flex;
-  flex-direction: column;
-  gap: 1rem;
-}
-
-.form-group {
-  display: flex;
-  flex-direction: column;
-  gap: 0.4rem;
-}
-
-.form-group input {
-  width: 100%;
-  box-sizing: border-box;
-  padding: 0.7rem;
-}
-
-.pattern-group {
-  display: flex;
-  flex-direction: column;
-  gap: 0.6rem;
-  padding: 1rem;
-}
-
-.pattern-group label {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-}
-
-.preview {
-  padding: 0.9rem;
-  border: 1px solid #cccccc;
-  border-radius: 8px;
-}
-
-.preview p {
-  margin-bottom: 0;
-}
-
-.form-actions {
-  display: flex;
-  justify-content: flex-end;
-  margin-top: 1rem;
-}
-
-.form-actions button {
-  padding: 0.7rem 1rem;
-  cursor: pointer;
-}
-
-.form-actions button:disabled {
-  cursor: not-allowed;
-  opacity: 0.6;
-}
-
-.error-message {
-  color: #b00020;
-}
-</style>
