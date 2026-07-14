@@ -1,23 +1,18 @@
 <script setup lang="ts">
 import { onMounted, ref } from 'vue'
-import { useRouter } from 'vue-router'
 
 import {
   deleteBuilding,
   getBuildings,
 } from '@/services/buildingService'
 
-import { useAuthStore } from '@/stores/auth'
-
 import type { Building } from '@/types/building'
-
+import AppNavBar from '@/components/layout/AppNavbar.vue'
 import BuildingList from '@/components/buildings/BuildingList.vue'
 import CreateBuildingModal from '@/components/buildings/CreateBuildingModal.vue'
 import BuildingSettingsStep from '@/components/buildings/BuildingSettingsStep.vue'
 import EditBuildingModal from '@/components/buildings/EditBuildingModal.vue'
 
-const router = useRouter()
-const authStore = useAuthStore()
 
 const buildings = ref<Building[]>([])
 const loading = ref(false)
@@ -97,50 +92,22 @@ async function removeBuilding(id: number) {
   }
 }
 
-async function logout() {
-  authStore.logout()
 
-  await router.push({
-    name: 'login',
-  })
-}
-
-onMounted(async () => {
-  await authStore.fetchCurrentManager()
-  await loadBuildings()
-})
+onMounted(loadBuildings)
 </script>
 
 <template>
+  <AppNavBar />
   <main class="buildings">
     <header class="page-header">
-      <div>
-        <h1>Buildings</h1>
+      <h1>Buildings</h1>
 
-        <p
-          v-if="authStore.manager"
-          class="manager-name"
-        >
-          Logged in as {{ authStore.manager.fullName }}
-        </p>
-      </div>
-
-      <div class="header-actions">
-        <button
-          type="button"
-          @click="showCreateModal = true"
-        >
-          + Create Building
-        </button>
-
-        <button
-          type="button"
-          class="logout-button"
-          @click="logout"
-        >
-          Logout
-        </button>
-      </div>
+      <button
+        type="button"
+        @click="showCreateModal = true"
+      >
+        + Create Building
+      </button>
     </header>
 
     <p v-if="loading">
@@ -206,22 +173,9 @@ onMounted(async () => {
   margin: 0;
 }
 
-.manager-name {
-  margin: 0.4rem 0 0;
-}
-
-.header-actions {
-  display: flex;
-  gap: 0.75rem;
-}
-
 button {
   padding: 0.65rem 1rem;
   cursor: pointer;
-}
-
-.logout-button {
-  background: transparent;
 }
 
 .error-message {
