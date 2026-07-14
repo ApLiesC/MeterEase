@@ -7,15 +7,12 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import java.util.List;
 import java.util.Optional;
 
-public interface MeterReadingRepository
+public interface MeterReadingRepository 
         extends JpaRepository<MeterReading, Integer> {
 
-    List<MeterReading> findByRoomRoomIdOrderByRecordedDateTimeDesc(
-            Integer roomId
-    );
+    List<MeterReading> findByRoomRoomId(Integer roomId);
 
-    Optional<MeterReading>
-    findTopByRoomRoomIdAndUtilityTypeOrderByRecordedDateTimeDesc(
+    Optional<MeterReading> findTopByRoomRoomIdAndUtilityTypeOrderByRecordedDateTimeDesc(
             Integer roomId,
             UtilityType utilityType
     );
