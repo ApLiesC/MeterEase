@@ -12,7 +12,7 @@ import { useAuthStore } from '@/stores/auth'
 
 import type { Building } from '@/types/building'
 import type { Room } from '@/types/room'
-
+import EditRoomModal from '@/components/rooms/EditRoomModal.vue'
 const router = useRouter()
 const authStore = useAuthStore()
 
@@ -25,7 +25,8 @@ const loadingBuildings = ref(false)
 const loadingRooms = ref(false)
 const showCreateRoomModal = ref(false)
 const errorMessage = ref('')
-
+const showEditRoomModal = ref(false)
+const selectedRoom = ref<Room | null>(null)
 async function loadBuildings(): Promise<void> {
   loadingBuildings.value = true
   errorMessage.value = ''
@@ -38,7 +39,7 @@ async function loadBuildings(): Promise<void> {
       selectedBuildingId.value === null
     ) {
       selectedBuildingId.value =
-        buildings.value[0].buildingId ?? null
+  buildings.value.at(0)?.buildingId ?? null
     }
   } catch (error) {
     errorMessage.value =
@@ -49,7 +50,20 @@ async function loadBuildings(): Promise<void> {
     loadingBuildings.value = false
   }
 }
+function openEditRoom(room: Room): void {
+  selectedRoom.value = room
+  showEditRoomModal.value = true
+}
 
+function closeEditRoom(): void {
+  showEditRoomModal.value = false
+  selectedRoom.value = null
+}
+
+async function handleRoomUpdated(): Promise<void> {
+  closeEditRoom()
+  await loadRooms()
+}
 async function loadRooms(): Promise<void> {
   if (selectedBuildingId.value === null) {
     rooms.value = []
@@ -100,6 +114,10 @@ async function logout(): Promise<void> {
   await router.push({
     name: 'login',
   })
+}
+async function handleRoomCreated(): Promise<void> {
+  showCreateRoomModal.value = false
+  await loadRooms()
 }
 
 watch(selectedBuildingId, loadRooms)
@@ -233,9 +251,12 @@ onMounted(async () => {
         </div>
 
         <div class="room-actions">
-          <button type="button">
-            Edit
-          </button>
+          <button
+  type="button"
+  @click="openEditRoom(room)"
+>
+  Edit
+</button>
 
           <button
             type="button"
@@ -250,6 +271,13 @@ onMounted(async () => {
   v-if="showCreateRoomModal && selectedBuildingId !== null"
   :building-id="selectedBuildingId"
   @close="showCreateRoomModal = false"
+  @created="handleRoomCreated"
+/>
+<EditRoomModal
+  v-if="showEditRoomModal && selectedRoom"
+  :room="selectedRoom"
+  @close="closeEditRoom"
+  @updated="handleRoomUpdated"
 />
   </main>
 </template>

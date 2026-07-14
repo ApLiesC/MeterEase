@@ -1,4 +1,9 @@
 <script setup lang="ts">
+import { ref } from 'vue'
+
+import SingleRoomForm from './SingleRoomForm.vue'
+import MultipleRoomForm from './MultipleRoomForm.vue'
+
 defineProps<{
   buildingId: number
 }>()
@@ -7,41 +12,63 @@ const emit = defineEmits<{
   close: []
   created: []
 }>()
+
+type RoomMode = 'single' | 'multiple'
+
+const mode = ref<RoomMode>('single')
 </script>
 
 <template>
   <div class="modal-backdrop">
     <div class="modal">
-      <h2>Create Room</h2>
 
-      <p>
-        Selected building ID: {{ buildingId }}
-      </p>
+      <header class="modal-header">
+        <h2>Create Room</h2>
 
-      <button
-        type="button"
-        @click="emit('close')"
-      >
-        Close
-      </button>
+        <button
+          class="close"
+          @click="emit('close')"
+        >
+          ✕
+        </button>
+      </header>
+
+      <div class="mode-picker">
+
+        <label>
+          <input
+            type="radio"
+            value="single"
+            v-model="mode"
+          />
+
+          Single Room
+        </label>
+
+        <label>
+          <input
+            type="radio"
+            value="multiple"
+            v-model="mode"
+          />
+
+          Multiple Rooms
+        </label>
+
+      </div>
+
+      <SingleRoomForm
+  v-if="mode === 'single'"
+  :building-id="buildingId"
+  @created="emit('created')"
+/>
+
+      <MultipleRoomForm
+        v-else
+        :building-id="buildingId"
+        @created="emit('created')"
+      />
+
     </div>
   </div>
 </template>
-
-<style scoped>
-.modal-backdrop {
-  position: fixed;
-  inset: 0;
-  display: grid;
-  place-items: center;
-  background: rgba(0, 0, 0, 0.4);
-}
-
-.modal {
-  width: 100%;
-  max-width: 500px;
-  padding: 24px;
-  background: white;
-  border-radius: 10px;
-}
-</style>
