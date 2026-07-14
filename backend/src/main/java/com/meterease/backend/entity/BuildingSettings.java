@@ -21,8 +21,12 @@ public class BuildingSettings {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer settingId;
 
-    @OneToOne
-    @JoinColumn(name = "building_id", nullable = false, unique = true)
+    @OneToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(
+            name = "building_id",
+            nullable = false,
+            unique = true
+    )
     private Building building;
 
     @Enumerated(EnumType.STRING)

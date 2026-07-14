@@ -6,6 +6,9 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.util.ArrayList;
+import java.util.List;
+
 @Entity
 @Table(name = "buildings")
 @Getter
@@ -28,4 +31,18 @@ public class Building {
     @NotBlank
     @Column(nullable = false)
     private String address;
+
+    @OneToOne(
+            mappedBy = "building",
+            cascade = CascadeType.ALL,
+            orphanRemoval = true
+    )
+    private BuildingSettings buildingSettings;
+
+    @OneToMany(
+            mappedBy = "building",
+            cascade = CascadeType.ALL,
+            orphanRemoval = true
+    )
+    private List<Room> rooms = new ArrayList<>();
 }
