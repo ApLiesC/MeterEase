@@ -34,6 +34,26 @@ const router = createRouter({
     guestOnly: true,
   },
 },
+{
+  path: '/rooms',
+  name: 'rooms',
+  component: () =>
+    import('@/views/rooms/RoomsView.vue'),
+  meta: {
+    requiresAuth: true,
+  },
+},
+{
+  path: '/meter-readings',
+  name: 'meter-readings',
+  component: () =>
+    import(
+      '@/views/meter-readings/MeterReadingsView.vue'
+    ),
+  meta: {
+    requiresAuth: true,
+  },
+},
   ],
 })
 
