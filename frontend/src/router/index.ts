@@ -34,6 +34,15 @@ const router = createRouter({
     guestOnly: true,
   },
 },
+{
+  path: '/rooms',
+  name: 'rooms',
+  component: () =>
+    import('@/views/rooms/RoomsView.vue'),
+  meta: {
+    requiresAuth: true,
+  },
+},
   ],
 })
 
