@@ -15,7 +15,11 @@ export async function apiRequest<T>(
 
   const headers = new Headers(fetchOptions.headers)
 
-  if (fetchOptions.body && !headers.has('Content-Type')) {
+  if (
+    fetchOptions.body &&
+    !(fetchOptions.body instanceof FormData) &&
+    !headers.has('Content-Type')
+  ) {
     headers.set('Content-Type', 'application/json')
   }
 
@@ -40,35 +44,48 @@ export async function apiRequest<T>(
     )
   }
 
+  const responseText = await response.text()
+
   if (!response.ok) {
-    let message = `Request failed with status ${response.status}`
+    let message =
+      `Request failed with status ${response.status}`
 
-    try {
-      const body = await response.json()
+    if (responseText) {
+      try {
+        const body = JSON.parse(responseText)
 
-      if (typeof body.message === 'string') {
-        message = body.message
-      } else if (typeof body.detail === 'string') {
-        message = body.detail
-      } else if (typeof body.error === 'string') {
-        message = body.error
-      } else if (body.errors) {
-        if (Array.isArray(body.errors)) {
-          message = body.errors.join(', ')
-        } else {
-          message = Object.values(body.errors).join(', ')
+        if (typeof body.message === 'string') {
+          message = body.message
+        } else if (typeof body.detail === 'string') {
+          message = body.detail
+        } else if (typeof body.error === 'string') {
+          message = body.error
+        } else if (body.errors) {
+          if (Array.isArray(body.errors)) {
+            message = body.errors.join(', ')
+          } else {
+            message = Object.values(
+              body.errors,
+            ).join(', ')
+          }
         }
+      } catch {
+        message = responseText
       }
-    } catch {
-      // Keep the default status message.
     }
 
     throw new Error(message)
   }
 
-  if (response.status === 204) {
+  if (!responseText) {
     return undefined as T
   }
 
-  return response.json() as Promise<T>
+  try {
+    return JSON.parse(responseText) as T
+  } catch {
+    throw new Error(
+      'The server returned an invalid JSON response.',
+    )
+  }
 }

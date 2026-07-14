@@ -41,7 +41,10 @@ async function logout() {
         >
           Rooms
         </RouterLink>
-
+        
+<RouterLink to="/meter-readings">
+  Meter Readings
+</RouterLink>
       </nav>
 
     </div>
