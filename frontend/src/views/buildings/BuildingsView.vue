@@ -1,9 +1,13 @@
 <script setup lang="ts">
 import { onMounted, ref } from 'vue'
+import { useRouter } from 'vue-router'
+
 import {
   deleteBuilding,
   getBuildings,
 } from '@/services/buildingService'
+
+import { useAuthStore } from '@/stores/auth'
 
 import type { Building } from '@/types/building'
 
@@ -11,6 +15,9 @@ import BuildingList from '@/components/buildings/BuildingList.vue'
 import CreateBuildingModal from '@/components/buildings/CreateBuildingModal.vue'
 import BuildingSettingsStep from '@/components/buildings/BuildingSettingsStep.vue'
 import EditBuildingModal from '@/components/buildings/EditBuildingModal.vue'
+
+const router = useRouter()
+const authStore = useAuthStore()
 
 const buildings = ref<Building[]>([])
 const loading = ref(false)
@@ -90,37 +97,66 @@ async function removeBuilding(id: number) {
   }
 }
 
-onMounted(loadBuildings)
+async function logout() {
+  authStore.logout()
+
+  await router.push({
+    name: 'login',
+  })
+}
+
+onMounted(async () => {
+  await authStore.fetchCurrentManager()
+  await loadBuildings()
+})
 </script>
 
 <template>
   <main class="buildings">
-
     <header class="page-header">
-      <h1>
-        Buildings
-      </h1>
+      <div>
+        <h1>Buildings</h1>
 
-      <button
-        @click="showCreateModal = true"
-      >
-        + Create Building
-      </button>
+        <p
+          v-if="authStore.manager"
+          class="manager-name"
+        >
+          Logged in as {{ authStore.manager.fullName }}
+        </p>
+      </div>
+
+      <div class="header-actions">
+        <button
+          type="button"
+          @click="showCreateModal = true"
+        >
+          + Create Building
+        </button>
+
+        <button
+          type="button"
+          class="logout-button"
+          @click="logout"
+        >
+          Logout
+        </button>
+      </div>
     </header>
-
 
     <p v-if="loading">
       Loading...
     </p>
 
-    <p v-else-if="error">
+    <p
+      v-else-if="error"
+      class="error-message"
+    >
       {{ error }}
     </p>
 
     <p v-else-if="buildings.length === 0">
       No buildings found.
     </p>
-
 
     <BuildingList
       v-else
@@ -129,13 +165,11 @@ onMounted(loadBuildings)
       @delete="removeBuilding"
     />
 
-
     <CreateBuildingModal
       v-if="showCreateModal"
       @close="showCreateModal = false"
       @created="openSettings"
     />
-
 
     <BuildingSettingsStep
       v-if="showSettings && selectedBuilding"
@@ -144,14 +178,12 @@ onMounted(loadBuildings)
       @back="cancelSettings"
     />
 
-
     <EditBuildingModal
       v-if="showEditModal && selectedBuilding"
       :building="selectedBuilding"
       @close="closeEdit"
       @updated="finishEdit"
     />
-
   </main>
 </template>
 
@@ -165,6 +197,34 @@ onMounted(loadBuildings)
 .page-header {
   display: flex;
   justify-content: space-between;
-  align-items: center;
+  align-items: flex-start;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+.page-header h1 {
+  margin: 0;
+}
+
+.manager-name {
+  margin: 0.4rem 0 0;
+}
+
+.header-actions {
+  display: flex;
+  gap: 0.75rem;
+}
+
+button {
+  padding: 0.65rem 1rem;
+  cursor: pointer;
+}
+
+.logout-button {
+  background: transparent;
+}
+
+.error-message {
+  color: #b00020;
 }
 </style>
