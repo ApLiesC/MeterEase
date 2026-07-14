@@ -6,7 +6,7 @@ export function createBuildingSettings(
   settings: BuildingSettings,
 ) {
   return apiRequest<BuildingSettings>(
-    `/buildings/${buildingId}/settings`,
+    `/api/buildings/${buildingId}/settings`,
     {
       method: 'POST',
       body: JSON.stringify(settings),
@@ -18,7 +18,7 @@ export function getBuildingSettings(
   buildingId: number,
 ) {
   return apiRequest<BuildingSettings>(
-    `/buildings/${buildingId}/settings`,
+    `/api/buildings/${buildingId}/settings`,
   )
 }
 
@@ -27,7 +27,7 @@ export function updateBuildingSettings(
   settings: BuildingSettings,
 ) {
   return apiRequest<BuildingSettings>(
-    `/buildings/${buildingId}/settings`,
+    `/api/buildings/${buildingId}/settings`,
     {
       method: 'PUT',
       body: JSON.stringify(settings),
