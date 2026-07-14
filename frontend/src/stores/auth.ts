@@ -1,5 +1,6 @@
 import { defineStore } from 'pinia'
 import { apiRequest } from '@/services/api'
+
 import type {
   AuthResponse,
   LoginRequest,
@@ -21,43 +22,57 @@ export const useAuthStore = defineStore('auth', {
   }),
 
   getters: {
-    isAuthenticated: (state) => Boolean(state.accessToken),
+    isAuthenticated: (state) =>
+      Boolean(state.accessToken),
   },
 
   actions: {
-    async register(request: RegisterRequest): Promise<Manager> {
-      this.loading = true
+    async register(
+  request: RegisterRequest,
+): Promise<Manager> {
+  this.loading = true
 
-      try {
-        return await apiRequest<Manager>('/api/auth/register', {
-          method: 'POST',
-          body: JSON.stringify(request),
-        })
-      } finally {
-        this.loading = false
-      }
-    },
+  try {
+    return await apiRequest<Manager>(
+      '/api/auth/register',
+      {
+        method: 'POST',
+        authenticated: false,
+        body: JSON.stringify(request),
+      },
+    )
+  } finally {
+    this.loading = false
+  }
+},
 
-    async login(request: LoginRequest): Promise<void> {
+    async login(
+      request: LoginRequest,
+    ): Promise<void> {
       this.loading = true
 
       try {
         const response = await apiRequest<AuthResponse>(
-          '/api/auth/login',
-          {
-            method: 'POST',
-            body: JSON.stringify(request),
-          },
-        )
+  '/api/auth/login',
+  {
+    method: 'POST',
+    authenticated: false,
+    body: JSON.stringify(request),
+  },
+)
 
         this.accessToken = response.accessToken
+
         this.manager = {
           managerId: response.managerId,
           fullName: response.fullName,
           emailAddress: response.emailAddress,
         }
 
-        localStorage.setItem('accessToken', response.accessToken)
+        localStorage.setItem(
+          'accessToken',
+          response.accessToken,
+        )
       } finally {
         this.loading = false
       }
@@ -69,7 +84,8 @@ export const useAuthStore = defineStore('auth', {
       }
 
       try {
-        this.manager = await apiRequest<Manager>('/api/auth/me')
+        this.manager =
+          await apiRequest<Manager>('/api/auth/me')
       } catch {
         this.logout()
       }

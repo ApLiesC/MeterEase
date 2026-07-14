@@ -1,39 +1,66 @@
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL
 
+interface ApiRequestOptions extends RequestInit {
+  authenticated?: boolean
+}
+
 export async function apiRequest<T>(
   path: string,
-  options: RequestInit = {},
+  options: ApiRequestOptions = {},
 ): Promise<T> {
-  const token = localStorage.getItem('accessToken')
+  const {
+    authenticated = true,
+    ...fetchOptions
+  } = options
 
-  const headers = new Headers(options.headers)
+  const headers = new Headers(fetchOptions.headers)
 
-  if (!headers.has('Content-Type') && options.body) {
+  if (fetchOptions.body && !headers.has('Content-Type')) {
     headers.set('Content-Type', 'application/json')
   }
 
-  if (token) {
-    headers.set('Authorization', `Bearer ${token}`)
+  if (authenticated) {
+    const token = localStorage.getItem('accessToken')
+
+    if (token) {
+      headers.set('Authorization', `Bearer ${token}`)
+    }
   }
 
-  const response = await fetch(`${API_BASE_URL}${path}`, {
-    ...options,
-    headers,
-  })
+  let response: Response
+
+  try {
+    response = await fetch(`${API_BASE_URL}${path}`, {
+      ...fetchOptions,
+      headers,
+    })
+  } catch {
+    throw new Error(
+      'Unable to connect to the server. Make sure the backend is running.',
+    )
+  }
 
   if (!response.ok) {
     let message = `Request failed with status ${response.status}`
 
     try {
-      const errorBody = await response.json()
+      const body = await response.json()
 
-      if (errorBody.message) {
-        message = errorBody.message
-      } else if (errorBody.detail) {
-        message = errorBody.detail
+      if (typeof body.message === 'string') {
+        message = body.message
+      } else if (typeof body.detail === 'string') {
+        message = body.detail
+      } else if (typeof body.error === 'string') {
+        message = body.error
+      } else if (body.errors) {
+        if (Array.isArray(body.errors)) {
+          message = body.errors.join(', ')
+        } else {
+          message = Object.values(body.errors).join(', ')
+        }
       }
     } catch {
-      // Response may not contain JSON.
+      // Keep the default status message.
     }
 
     throw new Error(message)
