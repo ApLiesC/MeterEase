@@ -16,4 +16,8 @@ public interface MeterReadingRepository
             Integer roomId,
             UtilityType utilityType
     );
+    List<MeterReading>
+    findByRoomRoomIdOrderByRecordedDateTimeDesc(
+            Integer roomId
+    );
 }

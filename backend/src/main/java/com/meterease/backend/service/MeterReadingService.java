@@ -7,13 +7,13 @@ import java.util.List;
 public interface MeterReadingService {
 
     void recordMeterReadings(
+            String managerEmail,
             Integer buildingId,
             List<MeterReadingDTO> readings
     );
 
-
-    List<MeterReadingDTO> getMeterReadings(
+    List<MeterReadingDTO> getMeterReadingHistory(
+            String managerEmail,
             Integer roomId
     );
-
 }
