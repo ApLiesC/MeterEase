@@ -67,8 +67,14 @@ export async function apiRequest<T>(
   }
 
   if (response.status === 204) {
-    return undefined as T
-  }
+  return undefined as T
+}
 
-  return response.json() as Promise<T>
+const responseText = await response.text()
+
+if (!responseText) {
+  return undefined as T
+}
+
+return JSON.parse(responseText) as T
 }
