@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { computed, ref } from 'vue'
-
+import { scanMeterImage } from '@/services/meterOcrService'
 import { recordMeterReadings } from '@/services/meterReadingService'
 
 import type {
@@ -18,7 +18,14 @@ const emit = defineEmits<{
   cancel: []
   saved: []
 }>()
+const electricityOcrLoading = ref(false)
+const waterOcrLoading = ref(false)
 
+const electricityImageName = ref('')
+const waterImageName = ref('')
+
+const electricityOcrMessage = ref('')
+const waterOcrMessage = ref('')
 const currentIndex = ref(0)
 const electricityReading = ref<number | null>(null)
 const waterReading = ref<number | null>(null)
@@ -51,6 +58,13 @@ const progressText = computed(() => {
 function resetInputs(): void {
   electricityReading.value = null
   waterReading.value = null
+
+  electricityImageName.value = ''
+  waterImageName.value = ''
+
+  electricityOcrMessage.value = ''
+  waterOcrMessage.value = ''
+
   errorMessage.value = ''
 }
 
@@ -70,6 +84,86 @@ function skipRoom(): void {
 
   currentIndex.value += 1
   resetInputs()
+}
+
+async function scanElectricityMeter(
+  event: Event,
+): Promise<void> {
+  const input = event.target as HTMLInputElement
+  const file = input.files?.[0]
+
+  if (!file) {
+    return
+  }
+
+  electricityOcrLoading.value = true
+  electricityOcrMessage.value = ''
+  errorMessage.value = ''
+  electricityImageName.value = file.name
+
+  try {
+    const result = await scanMeterImage(file)
+
+    if (result.suggestedReading === null) {
+      electricityOcrMessage.value =
+        'No clear electricity reading was detected.'
+      return
+    }
+
+    electricityReading.value =
+      result.suggestedReading
+
+    electricityOcrMessage.value =
+      `Detected reading: ${result.suggestedReading}. Please confirm it before saving.`
+  } catch (error) {
+    errorMessage.value =
+      error instanceof Error
+        ? error.message
+        : 'Failed to scan the electricity meter.'
+  } finally {
+    electricityOcrLoading.value = false
+    input.value = ''
+  }
+}
+
+async function scanWaterMeter(
+  event: Event,
+): Promise<void> {
+  const input = event.target as HTMLInputElement
+  const file = input.files?.[0]
+
+  if (!file) {
+    return
+  }
+
+  waterOcrLoading.value = true
+  waterOcrMessage.value = ''
+  errorMessage.value = ''
+  waterImageName.value = file.name
+
+  try {
+    const result = await scanMeterImage(file)
+
+    if (result.suggestedReading === null) {
+      waterOcrMessage.value =
+        'No clear water reading was detected.'
+      return
+    }
+
+    waterReading.value =
+      result.suggestedReading
+
+    waterOcrMessage.value =
+      `Detected reading: ${result.suggestedReading}. Please confirm it before saving.`
+  } catch (error) {
+    errorMessage.value =
+      error instanceof Error
+        ? error.message
+        : 'Failed to scan the water meter.'
+  } finally {
+    waterOcrLoading.value = false
+    input.value = ''
+  }
 }
 
 async function saveCurrentRoom(): Promise<void> {
@@ -225,7 +319,35 @@ async function saveCurrentRoom(): Promise<void> {
           placeholder="Enter electricity reading"
         />
       </section>
+<div class="ocr-control">
+  <label for="electricityMeterImage">
+    Electricity meter image
+  </label>
 
+  <input
+    id="electricityMeterImage"
+    type="file"
+    accept="image/*"
+    capture="environment"
+    :disabled="electricityOcrLoading || loading"
+    @change="scanElectricityMeter"
+  />
+
+  <p v-if="electricityImageName">
+    Selected: {{ electricityImageName }}
+  </p>
+
+  <p v-if="electricityOcrLoading">
+    Scanning electricity meter...
+  </p>
+
+  <p
+    v-else-if="electricityOcrMessage"
+    class="ocr-message"
+  >
+    {{ electricityOcrMessage }}
+  </p>
+</div>
       <section class="reading-section">
         <h4>Water</h4>
 
@@ -250,21 +372,35 @@ async function saveCurrentRoom(): Promise<void> {
           placeholder="Enter water reading"
         />
       </section>
+<div class="ocr-control">
+  <label for="waterMeterImage">
+    Water meter image
+  </label>
 
-      <section class="ocr-placeholder">
-        <label>
-          <input
-            type="checkbox"
-            disabled
-          />
+  <input
+    id="waterMeterImage"
+    type="file"
+    accept="image/*"
+    capture="environment"
+    :disabled="waterOcrLoading || loading"
+    @change="scanWaterMeter"
+  />
 
-          OCR
-        </label>
+  <p v-if="waterImageName">
+    Selected: {{ waterImageName }}
+  </p>
 
-        <small>
-          OCR meter scanning will be added later.
-        </small>
-      </section>
+  <p v-if="waterOcrLoading">
+    Scanning water meter...
+  </p>
+
+  <p
+    v-else-if="waterOcrMessage"
+    class="ocr-message"
+  >
+    {{ waterOcrMessage }}
+  </p>
+</div>
 
       <p
         v-if="errorMessage"
@@ -403,5 +539,28 @@ button:disabled {
 
 .empty-message {
   text-align: center;
+}
+
+.ocr-control {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  margin-top: 0.8rem;
+  padding: 0.9rem;
+  border: 1px solid #dddddd;
+  border-radius: 8px;
+}
+
+.ocr-control input[type='file'] {
+  padding: 0.4rem 0;
+}
+
+.ocr-control p {
+  margin: 0;
+  font-size: 0.9rem;
+}
+
+.ocr-message {
+  color: #087830;
 }
 </style>
