@@ -98,33 +98,62 @@ onMounted(loadBuildings)
 
 <template>
   <AppNavBar />
-  <main class="buildings">
-    <header class="page-header">
-      <h1>Buildings</h1>
+
+  <main
+    class="mx-auto max-w-5xl p-4 font-mono uppercase tracking-wider"
+  >
+    <!-- Header -->
+    <header
+      class="mb-8 flex flex-col gap-3 border-b border-black pb-5 sm:flex-row sm:items-center sm:justify-between"
+    >
+      <div>
+        <h1 class="text-3xl font-bold">
+          Buildings
+        </h1>
+
+        <p class="mt-1 text-s text-gray-500">
+          Manage your apartment and dormitory buildings
+        </p>
+      </div>
 
       <button
         type="button"
+        class="rounded-sm border border-black px-4 py-2 text-sm font-semibold transition hover:bg-black hover:text-white"
         @click="showCreateModal = true"
       >
         + Create Building
       </button>
     </header>
 
-    <p v-if="loading">
-      Loading...
-    </p>
-
+    <!-- Error -->
     <p
-      v-else-if="error"
-      class="error-message"
+      v-if="error"
+      class="mb-5 rounded-sm border border-black bg-neutral-100 p-3 text-sm text-red-600"
     >
       {{ error }}
     </p>
 
-    <p v-else-if="buildings.length === 0">
+
+    <!-- Loading -->
+    <p
+      v-if="loading"
+      class="border border-black p-4 text-sm text-gray-600"
+    >
+      Loading buildings...
+    </p>
+
+    <!-- Empty -->
+    <p
+      v-else-if="
+        !error &&
+        buildings.length === 0
+      "
+      class="border border-black p-4 text-sm text-gray-500"
+    >
       No buildings found.
     </p>
 
+    <!-- Building Cards -->
     <BuildingList
       v-else
       :buildings="buildings"
@@ -132,6 +161,7 @@ onMounted(loadBuildings)
       @delete="removeBuilding"
     />
 
+    <!-- Modals -->
     <CreateBuildingModal
       v-if="showCreateModal"
       @close="showCreateModal = false"
@@ -139,14 +169,20 @@ onMounted(loadBuildings)
     />
 
     <BuildingSettingsStep
-      v-if="showSettings && selectedBuilding"
+      v-if="
+        showSettings &&
+        selectedBuilding
+      "
       :building-id="selectedBuilding.buildingId!"
       @completed="finishCreation"
       @back="cancelSettings"
     />
 
     <EditBuildingModal
-      v-if="showEditModal && selectedBuilding"
+      v-if="
+        showEditModal &&
+        selectedBuilding
+      "
       :building="selectedBuilding"
       @close="closeEdit"
       @updated="finishEdit"
@@ -155,30 +191,4 @@ onMounted(loadBuildings)
 </template>
 
 <style scoped>
-.buildings {
-  max-width: 900px;
-  margin: 2rem auto;
-  padding: 1rem;
-}
-
-.page-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-start;
-  gap: 1rem;
-  margin-bottom: 1.5rem;
-}
-
-.page-header h1 {
-  margin: 0;
-}
-
-button {
-  padding: 0.65rem 1rem;
-  cursor: pointer;
-}
-
-.error-message {
-  color: #b00020;
-}
 </style>

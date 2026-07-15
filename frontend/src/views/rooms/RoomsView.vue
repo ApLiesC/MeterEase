@@ -143,7 +143,7 @@ onMounted(async () => {
           Rooms
         </h1>
 
-        <p class="mt-1 text-xs text-gray-500">
+        <p class="mt-1 text-s text-gray-500">
           Manage room information and charges
         </p>
       </div>

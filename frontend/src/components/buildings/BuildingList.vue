@@ -13,7 +13,7 @@ const emit = defineEmits<{
 </script>
 
 <template>
-  <section class="building-list">
+  <section class="flex flex-col gap-4">
     <BuildingCard
       v-for="building in buildings"
       :key="building.buildingId"
@@ -23,12 +23,3 @@ const emit = defineEmits<{
     />
   </section>
 </template>
-
-<style scoped>
-.building-list {
-  display: flex;
-  flex-direction: column;
-  gap: 1rem;
-  margin-top: 2rem;
-}
-</style>

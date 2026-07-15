@@ -119,240 +119,269 @@ onMounted(loadData)
 
 
 <template>
-  <div class="overlay">
-    <div class="modal">
+  <div
+    class="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4"
+    @click.self="$emit('close')"
+  >
+    <section
+      class="w-full max-w-2xl rounded-md border border-black bg-neutral-100 p-5 font-mono uppercase tracking-wider"
+    >
+      <!-- Header -->
+      <header
+        class="mb-5 flex items-center justify-between border-b border-black pb-3"
+      >
+        <div>
+          <h2 class="text-lg font-bold">
+            Edit Building
+          </h2>
 
-      <h2>Edit Building</h2>
+          <p class="mt-1 text-[11px] text-gray-500">
+            Update building information and billing settings
+          </p>
+        </div>
 
-      <p v-if="error">
+        <button
+          class="rounded-sm border border-black px-2 py-1 text-xs transition hover:bg-black hover:text-white"
+          @click="$emit('close')"
+        >
+          ✕
+        </button>
+      </header>
+
+      <p
+        v-if="error"
+        class="mb-4 rounded-sm border border-red-700 bg-red-50 p-3 text-xs text-red-700"
+      >
         {{ error }}
       </p>
 
+      <form
+        class="space-y-5"
+        @submit.prevent="save"
+      >
+        <!-- Building Information -->
+        <section class="border-b border-black pb-4">
+          <h3 class="mb-3 text-sm font-bold">
+            Building Information
+          </h3>
 
-      <section>
-        <h3>Building Information</h3>
+          <div class="space-y-3">
+            <div>
+              <label
+                class="mb-1 block text-s text-gray-600"
+              >
+                Building Name
+              </label>
 
-        <label>
-          Building Name
+              <input
+                v-model="buildingForm.buildingName"
+                type="text"
+                class="h-10 w-full rounded-sm border border-black bg-white px-3 text-sm normal-case outline-none focus:ring-1 focus:ring-black"
+              />
+            </div>
 
-          <input
-            v-model="buildingForm.buildingName"
-            type="text"
-          />
-        </label>
+            <div>
+              <label
+                class="mb-1 block text-s text-gray-600"
+              >
+                Address
+              </label>
 
+              <input
+                v-model="buildingForm.address"
+                type="text"
+                class="h-10 w-full rounded-sm border border-black bg-white px-3 py-2 text-sm normal-case outline-none focus:ring-1 focus:ring-black"
+              />
+            </div>
+          </div>
+        </section>
 
-        <label>
-          Address
+        <!-- Utility Billing -->
+        <section class="border-b border-black pb-4">
+          <h3 class="mb-3 text-l font-bold">
+            Utility Billing
+          </h3>
 
-          <textarea
-            v-model="buildingForm.address"
-            rows="3"
-          />
-        </label>
-      </section>
+          <div class="space-y-3">
+            <!-- Electricity -->
+            <div
+              class="grid gap-3 sm:grid-cols-[120px_1fr_160px]"
+            >
+              <label
+                class="self-center text-s text-gray-600"
+              >
+                Electricity
+              </label>
 
+              <select
+                v-model="settingsForm.electricityBillingMethod"
+                class="h-10 rounded-sm border border-black bg-white px-3 text-sm normal-case outline-none focus:ring-1 focus:ring-black"
+              >
+                <option
+                  :value="BillingMethod.METER_BASED"
+                >
+                  Meter Based
+                </option>
 
-      <section>
-        <h3>Electricity Settings</h3>
+                <option
+                  :value="BillingMethod.FLAT_FEE"
+                >
+                  Flat Fee
+                </option>
+              </select>
 
-        <label>
-          Billing Method
+              <input
+                v-if="
+                  settingsForm.electricityBillingMethod ===
+                  BillingMethod.METER_BASED
+                "
+                v-model.number="
+                  settingsForm.electricityRatePerUnit
+                "
+                type="number"
+                min="0"
+                placeholder="Rate per unit"
+                class="h-10 rounded-sm border border-black bg-white px-3 text-sm outline-none focus:ring-1 focus:ring-black"
+              />
 
-          <select
-            v-model="settingsForm.electricityBillingMethod"
+              <input
+                v-else
+                v-model.number="
+                  settingsForm.electricityFlatFeeAmount
+                "
+                type="number"
+                min="0"
+                placeholder="Flat fee"
+                class="h-10 rounded-sm border border-black bg-white px-3 text-sm outline-none focus:ring-1 focus:ring-black"
+              />
+            </div>
+
+            <!-- Water -->
+            <div
+              class="grid gap-3 sm:grid-cols-[120px_1fr_160px]"
+            >
+              <label
+                class="self-center text-s text-gray-600"
+              >
+                Water
+              </label>
+
+              <select
+                v-model="settingsForm.waterBillingMethod"
+                class="h-10 rounded-sm border border-black bg-white px-3 text-sm normal-case outline-none focus:ring-1 focus:ring-black"
+              >
+                <option
+                  :value="BillingMethod.METER_BASED"
+                >
+                  Meter Based
+                </option>
+
+                <option
+                  :value="BillingMethod.FLAT_FEE"
+                >
+                  Flat Fee
+                </option>
+              </select>
+
+              <input
+                v-if="
+                  settingsForm.waterBillingMethod ===
+                  BillingMethod.METER_BASED
+                "
+                v-model.number="
+                  settingsForm.waterRatePerUnit
+                "
+                type="number"
+                min="0"
+                placeholder="Rate per unit"
+                class="h-10 rounded-sm border border-black bg-white px-3 text-sm outline-none focus:ring-1 focus:ring-black"
+              />
+
+              <input
+                v-else
+                v-model.number="
+                  settingsForm.waterFlatFeeAmount
+                "
+                type="number"
+                min="0"
+                placeholder="Flat fee"
+                class="h-10 rounded-sm border border-black bg-white px-3 text-sm outline-none focus:ring-1 focus:ring-black"
+              />
+            </div>
+          </div>
+        </section>
+
+        <!-- Payment Settings -->
+        <section class="border-b border-black pb-4">
+          <h3 class="mb-3 text-l font-bold">
+            Payment Settings
+          </h3>
+
+          <div
+            class="grid gap-3 sm:grid-cols-2"
           >
-            <option
-              :value="BillingMethod.METER_BASED"
-            >
-              Meter-Based
-            </option>
+            <div>
+              <label
+                class="mb-1 block text-s text-gray-600"
+              >
+                Due Date (Days)
+              </label>
 
-            <option
-              :value="BillingMethod.FLAT_FEE"
-            >
-              Flat Fee
-            </option>
-          </select>
-        </label>
+              <input
+                v-model.number="
+                  settingsForm.dueDatePeriodDays
+                "
+                type="number"
+                min="1"
+                class="h-10 w-full rounded-sm border border-black bg-white px-3 text-sm outline-none focus:ring-1 focus:ring-black"
+              />
+            </div>
 
+            <div>
+              <label
+                class="mb-1 block text-s text-gray-600"
+              >
+                Daily Late Fee
+              </label>
 
-        <label
-          v-if="
-            settingsForm.electricityBillingMethod ===
-            BillingMethod.METER_BASED
-          "
+              <input
+                v-model.number="
+                  settingsForm.dailyLateFeeAmount
+                "
+                type="number"
+                min="0"
+                placeholder="Daily late fee"
+                class="h-10 w-full rounded-sm border border-black bg-white px-3 text-sm outline-none focus:ring-1 focus:ring-black"
+              />
+            </div>
+          </div>
+        </section>
+
+        <!-- Actions -->
+        <footer
+          class="flex justify-end gap-2 border-t border-black pt-4"
         >
-          Rate Per Unit
-
-          <input
-            v-model.number="
-              settingsForm.electricityRatePerUnit
-            "
-            type="number"
-          />
-        </label>
-
-
-        <label
-          v-else
-        >
-          Flat Fee Amount
-
-          <input
-            v-model.number="
-              settingsForm.electricityFlatFeeAmount
-            "
-            type="number"
-          />
-        </label>
-      </section>
-
-
-      <section>
-        <h3>Water Settings</h3>
-
-        <label>
-          Billing Method
-
-          <select
-            v-model="settingsForm.waterBillingMethod"
+          <button
+            type="button"
+            class="rounded-sm border border-black px-5 py-2 text-sm transition hover:bg-neutral-200"
+            @click="$emit('close')"
           >
-            <option
-              :value="BillingMethod.METER_BASED"
-            >
-              Meter-Based
-            </option>
+            Cancel
+          </button>
 
-            <option
-              :value="BillingMethod.FLAT_FEE"
-            >
-              Flat Fee
-            </option>
-          </select>
-        </label>
-
-
-        <label
-          v-if="
-            settingsForm.waterBillingMethod ===
-            BillingMethod.METER_BASED
-          "
-        >
-          Rate Per Unit
-
-          <input
-            v-model.number="
-              settingsForm.waterRatePerUnit
-            "
-            type="number"
-          />
-        </label>
-
-
-        <label
-          v-else
-        >
-          Flat Fee Amount
-
-          <input
-            v-model.number="
-              settingsForm.waterFlatFeeAmount
-            "
-            type="number"
-          />
-        </label>
-      </section>
-
-
-      <section>
-        <h3>Late Payment Settings</h3>
-
-        <label>
-          Due Date Period (Days)
-
-          <input
-            v-model.number="
-              settingsForm.dueDatePeriodDays
-            "
-            type="number"
-          />
-        </label>
-
-
-        <label>
-          Daily Late Fee Amount
-
-          <input
-            v-model.number="
-              settingsForm.dailyLateFeeAmount
-            "
-            type="number"
-          />
-        </label>
-      </section>
-
-
-      <div class="buttons">
-
-        <button @click="$emit('close')">
-          Cancel
-        </button>
-
-        <button
-          :disabled="loading"
-          @click="save"
-        >
-          {{ loading ? 'Saving...' : 'Save' }}
-        </button>
-
-      </div>
-
-    </div>
+          <button
+            type="submit"
+            :disabled="loading"
+            class="rounded-sm border border-black bg-black px-5 py-2 text-sm text-white transition hover:bg-white hover:text-black disabled:cursor-not-allowed disabled:opacity-50"
+          >
+            {{
+              loading
+                ? 'Saving...'
+                : 'Save Changes'
+            }}
+          </button>
+        </footer>
+      </form>
+    </section>
   </div>
 </template>
-
-
-<style scoped>
-.overlay {
-  position: fixed;
-  inset: 0;
-  background: rgba(0,0,0,.4);
-  display:flex;
-  justify-content:center;
-  align-items:center;
-}
-
-.modal {
-  width:550px;
-  max-height:90vh;
-  overflow-y:auto;
-  background:white;
-  padding:24px;
-  border-radius:10px;
-}
-
-section {
-  margin-top:20px;
-}
-
-label {
-  display:block;
-  margin-top:12px;
-}
-
-input,
-textarea,
-select {
-  width:100%;
-  margin-top:5px;
-  padding:8px;
-}
-
-.buttons {
-  display:flex;
-  justify-content:flex-end;
-  gap:12px;
-  margin-top:20px;
-}
-</style>

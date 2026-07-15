@@ -41,83 +41,96 @@ async function submit() {
 </script>
 
 <template>
-  <div class="overlay">
-    <div class="modal">
-      <h2>Create Building</h2>
+  <div
+    class="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4"
+    @click.self="$emit('close')"
+  >
+    <section
+      class="w-full max-w-md rounded-md border border-black bg-neutral-100 p-5 font-mono uppercase tracking-wider"
+    >
+      <!-- Header -->
+      <header
+        class="mb-4 flex items-center justify-between border-b border-black pb-3"
+      >
+        <div>
+          <h2 class="text-lg font-bold">
+            Create Building
+          </h2>
 
-      <label>
-        Building Name
-        <input
-          v-model="form.buildingName"
-          type="text"
-          placeholder="Building name"
-        />
-      </label>
-
-      <label>
-        Address
-        <textarea
-          v-model="form.address"
-          rows="3"
-          placeholder="Building address"
-        />
-      </label>
-
-      <div class="buttons">
-        <button @click="$emit('close')">
-          Cancel
-        </button>
+          <p class="mt-1 text-[11px] text-gray-500">
+            Basic building information
+          </p>
+        </div>
 
         <button
-          :disabled="loading"
-          @click="submit"
+          class="rounded-sm border border-black px-2 py-1 text-xs transition hover:bg-black hover:text-white"
+          @click="$emit('close')"
         >
-          {{ loading ? 'Creating...' : 'Next' }}
+          ✕
         </button>
-      </div>
-    </div>
+      </header>
+
+      <form
+        class="space-y-4"
+        @submit.prevent="submit"
+      >
+        <!-- Building Name -->
+        <div>
+          <label
+            class="mb-1 block text-s text-gray-600"
+          >
+            Building Name
+          </label>
+
+          <input
+            v-model="form.buildingName"
+            type="text"
+            placeholder="Building A"
+            class="h-10 w-full rounded-sm border border-black bg-white px-3 text-sm normal-case outline-none focus:ring-1 focus:ring-black"
+          />
+        </div>
+
+        <!-- Address -->
+        <div>
+          <label
+            class="mb-1 block text-s text-gray-600"
+          >
+            Address
+          </label>
+
+          <textarea
+            v-model="form.address"
+            rows="3"
+            placeholder="Building address"
+            class="w-full resize-none rounded-sm border border-black bg-white px-3 py-2 text-sm normal-case outline-none focus:ring-1 focus:ring-black"
+          />
+        </div>
+
+        <!-- Actions -->
+        <footer
+          class="flex justify-end gap-2 border-t border-black pt-4"
+        >
+          <button
+            type="button"
+            class="rounded-sm border border-black px-5 py-2 text-sm transition hover:bg-neutral-200"
+            @click="$emit('close')"
+          >
+            Cancel
+          </button>
+
+          <button
+            type="submit"
+            :disabled="loading"
+            class="rounded-sm border border-black bg-black px-5 py-2 text-sm text-white transition hover:bg-white hover:text-black disabled:cursor-not-allowed disabled:opacity-50"
+          >
+            {{
+              loading
+                ? 'Creating...'
+                : 'Next'
+            }}
+          </button>
+        </footer>
+      </form>
+    </section>
   </div>
 </template>
-
-<style scoped>
-.overlay {
-  position: fixed;
-  inset: 0;
-  background: rgba(0, 0, 0, 0.4);
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  z-index: 1000;
-}
-
-.modal {
-  width: 500px;
-  background: white;
-  border-radius: 10px;
-  padding: 24px;
-}
-
-h2 {
-  margin-bottom: 20px;
-}
-
-label {
-  display: block;
-  margin-top: 16px;
-}
-
-input,
-textarea {
-  width: 100%;
-  margin-top: 6px;
-  padding: 8px;
-  box-sizing: border-box;
-}
-
-.buttons {
-  display: flex;
-  justify-content: flex-end;
-  gap: 12px;
-  margin-top: 24px;
-}
-</style>
