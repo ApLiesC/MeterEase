@@ -48,6 +48,13 @@ async function logout(): Promise<void> {
           >
             Rooms
           </RouterLink>
+
+          <RouterLink
+            to="/meter-readings"
+            class="rounded-sm border border-transparent px-3 py-1 text-sm transition hover:border-black"
+          >
+            Meter Readings
+          </RouterLink>
         </nav>
       </div>
 

@@ -11,6 +11,7 @@ import type { RoomReadingEntry } from '@/types/meterReading'
 
 import ListRecordingView from '@/components/meter-readings/ListRecordingView.vue'
 import CardRecordingView from '@/components/meter-readings/CardRecordingView.vue'
+import AppNavBar from '@/components/layout/AppNavbar.vue'
 
 type RecordingMode = 'list' | 'card'
 
@@ -170,6 +171,8 @@ onMounted(loadBuildings)
 </script>
 
 <template>
+  <AppNavBar />
+
   <main class="meter-readings-page">
     <header class="page-header">
       <div>
