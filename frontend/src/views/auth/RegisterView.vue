@@ -54,14 +54,33 @@ async function submitRegistration(): Promise<void> {
 </script>
 
 <template>
-  <main class="auth-page">
-    <section class="auth-card">
-      <h1>Create a MeterEase Account</h1>
+  <main
+    class="flex min-h-screen items-center justify-center bg-neutral-50 p-6"
+  >
+    <section
+      class="w-full max-w-md rounded-md border border-black bg-neutral-100 p-8 font-mono uppercase tracking-wider"
+    >
+      <!-- Header -->
+      <header class="mb-6 border-b border-black pb-4">
+        <h1 class="text-3xl font-bold">
+          MeterEase
+        </h1>
 
-      <form @submit.prevent="submitRegistration">
-        <div class="form-group">
-          <label for="fullName">
-            Full name
+        <p class="mt-1 text-xs text-gray-500">
+          Create Manager Account
+        </p>
+      </header>
+
+      <form
+        class="space-y-5"
+        @submit.prevent="submitRegistration"
+      >
+        <div>
+          <label
+            for="fullName"
+            class="mb-1 block text-s font-semibold"
+          >
+            Full Name
           </label>
 
           <input
@@ -70,12 +89,17 @@ async function submitRegistration(): Promise<void> {
             type="text"
             autocomplete="name"
             required
+            placeholder="John Smith"
+            class="h-10 w-full rounded-sm border border-black bg-white px-3 text-sm normal-case outline-none focus:ring-1 focus:ring-black"
           />
         </div>
 
-        <div class="form-group">
-          <label for="emailAddress">
-            Email address
+        <div>
+          <label
+            for="emailAddress"
+            class="mb-1 block text-s font-semibold"
+          >
+            Email Address
           </label>
 
           <input
@@ -84,11 +108,16 @@ async function submitRegistration(): Promise<void> {
             type="email"
             autocomplete="email"
             required
+            placeholder="manager@email.com"
+            class="h-10 w-full rounded-sm border border-black bg-white px-3 text-sm normal-case outline-none focus:ring-1 focus:ring-black"
           />
         </div>
 
-        <div class="form-group">
-          <label for="password">
+        <div>
+          <label
+            for="password"
+            class="mb-1 block text-s font-semibold"
+          >
             Password
           </label>
 
@@ -99,17 +128,23 @@ async function submitRegistration(): Promise<void> {
             autocomplete="new-password"
             minlength="8"
             required
+            class="h-10 w-full rounded-sm border border-black bg-white px-3 text-sm normal-case outline-none focus:ring-1 focus:ring-black"
           />
 
-          <small>
-            At least 8 characters with uppercase,
+          <p
+            class="mt-1 text-xs normal-case text-gray-800"
+          >
+            Minimum 8 characters with uppercase,
             lowercase, number, and special character.
-          </small>
+          </p>
         </div>
 
-        <div class="form-group">
-          <label for="passwordConfirmation">
-            Confirm password
+        <div>
+          <label
+            for="passwordConfirmation"
+            class="mb-1 block text-xs font-semibold"
+          >
+            Confirm Password
           </label>
 
           <input
@@ -119,12 +154,13 @@ async function submitRegistration(): Promise<void> {
             autocomplete="new-password"
             minlength="8"
             required
+            class="h-10 w-full rounded-sm border border-black bg-white px-3 text-sm normal-case outline-none focus:ring-1 focus:ring-black"
           />
         </div>
 
         <p
           v-if="errorMessage"
-          class="error-message"
+          class="rounded-sm border border-red-700 bg-red-50 p-3 text-xs text-red-700 normal-case"
         >
           {{ errorMessage }}
         </p>
@@ -132,61 +168,28 @@ async function submitRegistration(): Promise<void> {
         <button
           type="submit"
           :disabled="authStore.loading"
+          class="h-10 w-full rounded-sm border border-black bg-black text-l font-semibold text-white transition hover:bg-white hover:text-black disabled:cursor-not-allowed disabled:opacity-50"
         >
           {{
             authStore.loading
-              ? 'Creating account...'
-              : 'Register'
+              ? 'Creating Account...'
+              : 'Create Account'
           }}
         </button>
       </form>
 
-      <p>
+      <footer
+        class="mt-6 border-t border-black pt-4 text-center text-s text-gray-600 normal-case"
+      >
         Already have an account?
-        <RouterLink to="/login">
+
+        <RouterLink
+          to="/login"
+          class="font-semibold text-black underline underline-offset-2 transition hover:text-gray-600"
+        >
           Login
         </RouterLink>
-      </p>
+      </footer>
     </section>
   </main>
 </template>
-
-<style scoped>
-.auth-page {
-  min-height: 100vh;
-  display: grid;
-  place-items: center;
-  padding: 24px;
-}
-
-.auth-card {
-  width: 100%;
-  max-width: 420px;
-}
-
-.form-group {
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-  margin-bottom: 16px;
-}
-
-input {
-  padding: 10px;
-}
-
-button {
-  width: 100%;
-  padding: 10px;
-  cursor: pointer;
-}
-
-button:disabled {
-  cursor: not-allowed;
-  opacity: 0.6;
-}
-
-.error-message {
-  color: #b00020;
-}
-</style>
