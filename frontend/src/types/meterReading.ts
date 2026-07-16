@@ -25,4 +25,7 @@ export interface RoomReadingEntry {
 
   previousWater: number | null
   currentWater: number | null
+
+  electricityHistory: MeterReading[]
+  waterHistory: MeterReading[]
 }

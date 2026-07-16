@@ -1,6 +1,7 @@
 package com.meterease.backend.entity;
 
 import jakarta.persistence.*;
+import jakarta.validation.constraints.Size;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -27,6 +28,7 @@ public class Room {
     private Integer tenantId;
 
     @Column(nullable = false)
+    @Size(max = 20)
     private String roomName;
 
     @Column(nullable = false)

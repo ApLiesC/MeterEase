@@ -2,6 +2,7 @@ package com.meterease.backend.entity;
 
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Size;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -25,10 +26,12 @@ public class Building {
     private Manager manager;
 
     @NotBlank
+    @Size(max = 100)
     @Column(nullable = false)
     private String buildingName;
 
     @NotBlank
+    @Size(max = 255)
     @Column(nullable = false)
     private String address;
 

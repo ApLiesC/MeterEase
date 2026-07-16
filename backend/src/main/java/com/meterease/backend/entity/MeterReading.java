@@ -2,6 +2,8 @@ package com.meterease.backend.entity;
 
 import com.meterease.backend.type.UtilityType;
 import jakarta.persistence.*;
+import jakarta.validation.constraints.Max;
+import jakarta.validation.constraints.Min;
 import lombok.*;
 
 import java.time.LocalDateTime;
@@ -32,6 +34,8 @@ public class MeterReading {
 
 
     @Column(nullable = false)
+    @Min(0)
+    @Max(99999)
     private Integer meterReadingValue;
 
 

@@ -1,5 +1,10 @@
 <script setup lang="ts">
-import { computed, onMounted, ref, watch } from 'vue'
+import {
+  computed,
+  onMounted,
+  ref,
+  watch,
+} from 'vue'
 
 import { getBuildings } from '@/services/buildingService'
 import { getRooms } from '@/services/roomService'
@@ -19,7 +24,10 @@ const buildings = ref<Building[]>([])
 const rooms = ref<Room[]>([])
 const roomEntries = ref<RoomReadingEntry[]>([])
 
-const selectedBuildingId = ref<number | null>(null)
+const selectedBuildingId = ref<number | null>(
+  null,
+)
+
 const mode = ref<RecordingMode>('list')
 const recordingStarted = ref(false)
 
@@ -29,7 +37,8 @@ const errorMessage = ref('')
 const selectedBuilding = computed(() =>
   buildings.value.find(
     (building) =>
-      building.buildingId === selectedBuildingId.value,
+      building.buildingId ===
+      selectedBuildingId.value,
   ),
 )
 
@@ -42,12 +51,11 @@ async function loadBuildings(): Promise<void> {
 
     const firstBuilding = buildings.value.at(0)
 
-    if (firstBuilding?.buildingId !== undefined) {
-      /*
-       * The watcher below will automatically load the rooms
-       * when this value changes.
-       */
-      selectedBuildingId.value = firstBuilding.buildingId
+    if (
+      firstBuilding?.buildingId !== undefined
+    ) {
+      selectedBuildingId.value =
+        firstBuilding.buildingId
     } else {
       selectedBuildingId.value = null
       rooms.value = []
@@ -64,7 +72,8 @@ async function loadBuildings(): Promise<void> {
 }
 
 async function loadRoomsAndPreviousReadings(): Promise<void> {
-  const buildingId = selectedBuildingId.value
+  const buildingId =
+    selectedBuildingId.value
 
   if (buildingId === null) {
     rooms.value = []
@@ -79,40 +88,54 @@ async function loadRoomsAndPreviousReadings(): Promise<void> {
     rooms.value = await getRooms(buildingId)
 
     const validRooms = rooms.value.filter(
-      (room): room is Room & { roomId: number } =>
-        room.roomId !== undefined,
+      (
+        room,
+      ): room is Room & {
+        roomId: number
+      } => room.roomId !== undefined,
     )
 
     const entries = await Promise.all(
       validRooms.map(async (room) => {
-        const history = await getMeterReadingHistory(
-          room.roomId,
-        )
+        const history =
+          await getMeterReadingHistory(
+            room.roomId,
+          )
 
-        /*
-         * The backend returns the newest readings first.
-         * find() therefore gives us the latest reading
-         * for each utility type.
-         */
-        const previousElectricity =
-          history.find(
+        const electricityHistory =
+          history.filter(
             (reading) =>
-              reading.utilityType === 'ELECTRICITY',
-          )?.meterReadingValue ?? null
+              reading.utilityType ===
+              'ELECTRICITY',
+          )
+
+        const waterHistory =
+          history.filter(
+            (reading) =>
+              reading.utilityType ===
+              'WATER',
+          )
+
+        const previousElectricity =
+          electricityHistory.at(0)
+            ?.meterReadingValue ?? null
 
         const previousWater =
-          history.find(
-            (reading) =>
-              reading.utilityType === 'WATER',
-          )?.meterReadingValue ?? null
+          waterHistory.at(0)
+            ?.meterReadingValue ?? null
 
         return {
           roomId: room.roomId,
           roomName: room.roomName,
+
           previousElectricity,
           currentElectricity: null,
+
           previousWater,
           currentWater: null,
+
+          electricityHistory,
+          waterHistory,
         } satisfies RoomReadingEntry
       }),
     )
@@ -154,7 +177,10 @@ async function handleSaved(): Promise<void> {
 
 watch(
   selectedBuildingId,
-  async (newBuildingId, oldBuildingId) => {
+  async (
+    newBuildingId,
+    oldBuildingId,
+  ) => {
     if (
       newBuildingId === oldBuildingId ||
       newBuildingId === null
@@ -173,41 +199,87 @@ onMounted(loadBuildings)
 <template>
   <AppNavBar />
 
-  <main class="meter-readings-page">
-    <header class="page-header">
+  <main
+    class="mx-auto min-h-screen max-w-7xl px-4 py-8 font-mono uppercase tracking-wider sm:px-6"
+  >
+    <header
+      class="mb-8 flex flex-col gap-4 border-b border-black pb-5 sm:flex-row sm:items-end sm:justify-between"
+    >
       <div>
-        <h1>Meter Readings</h1>
+        <p
+          class="mb-2 text-xs font-semibold text-gray-500"
+        >
+          Meter Management
+        </p>
 
-        <p>
-          Record electricity and water readings.
+        <h1
+          class="text-3xl font-bold sm:text-4xl"
+        >
+          Meter Readings
+        </h1>
+
+        <p
+          class="mt-2 max-w-2xl text-sm normal-case tracking-normal text-gray-500"
+        >
+          Record electricity and water readings
+          and review previous meter history.
         </p>
       </div>
 
-      <RouterLink to="/rooms">
-        Rooms
+      <RouterLink
+        to="/rooms"
+        class="inline-flex w-fit items-center rounded-sm border border-black px-4 py-2 text-sm font-semibold transition hover:bg-black hover:text-white"
+      >
+        View Rooms →
       </RouterLink>
     </header>
 
-    <p
+    <div
       v-if="errorMessage"
-      class="error-message"
+      class="mb-6 border border-red-700 bg-red-50 px-4 py-3 text-sm text-red-700"
     >
       {{ errorMessage }}
-    </p>
+    </div>
 
     <section
       v-if="!recordingStarted"
-      class="setup-card"
+      class="mx-auto w-full max-w-2xl rounded-md border border-black bg-white p-6"
     >
-      <div class="form-group">
-        <label for="building">
-          Building
-        </label>
+      <header
+        class="mb-6 border-b border-black pb-4"
+      >
+        <h2 class="text-2xl font-bold">
+          Record Meter Readings
+        </h2>
+
+        <p
+          class="mt-1 text-sm normal-case tracking-normal text-gray-500"
+        >
+          Choose a building and recording
+          layout.
+        </p>
+      </header>
+
+      <section class="mb-6">
+        <div
+          class="mb-3 flex items-center gap-2"
+        >
+          <span
+            class="flex h-6 w-6 items-center justify-center rounded-full border border-black text-xs font-bold"
+          >
+            1
+          </span>
+
+          <h3 class="text-sm font-bold">
+            Select Building
+          </h3>
+        </div>
 
         <select
           id="building"
           v-model="selectedBuildingId"
           :disabled="loading"
+          class="w-full rounded-sm border border-black bg-neutral-100 px-3 py-2 text-sm outline-none transition hover:bg-white disabled:cursor-not-allowed disabled:border-gray-400 disabled:text-gray-400"
         >
           <option
             :value="null"
@@ -224,63 +296,144 @@ onMounted(loadBuildings)
             {{ building.buildingName }}
           </option>
         </select>
-      </div>
+      </section>
 
-      <fieldset class="view-picker">
-        <legend>Recording View</legend>
+      <section class="mb-6">
+        <div
+          class="mb-3 flex items-center gap-2"
+        >
+          <span
+            class="flex h-6 w-6 items-center justify-center rounded-full border border-black text-xs font-bold"
+          >
+            2
+          </span>
 
-        <label>
-          <input
-            v-model="mode"
-            type="radio"
-            value="list"
-          />
-          List View
-        </label>
+          <h3 class="text-sm font-bold">
+            Choose Recording Layout
+          </h3>
+        </div>
 
-        <label>
-          <input
-            v-model="mode"
-            type="radio"
-            value="card"
-          />
-          Card View
-        </label>
-      </fieldset>
+        <div
+          class="grid gap-3 sm:grid-cols-2"
+        >
+          <label class="cursor-pointer">
+            <input
+              v-model="mode"
+              type="radio"
+              value="list"
+              class="peer sr-only"
+            />
 
-      <p v-if="loading">
-        Loading rooms...
-      </p>
+            <div
+              class="h-full rounded-sm border border-black p-4 transition peer-checked:bg-black peer-checked:text-white"
+            >
+              <h4
+                class="mb-1 text-sm font-bold"
+              >
+                List View
+              </h4>
 
-      <p
-        v-else-if="
-          selectedBuildingId !== null &&
-          rooms.length === 0
-        "
+              <p
+                class="text-xs normal-case tracking-normal"
+              >
+                Best for entering many rooms
+                quickly in a table format.
+              </p>
+            </div>
+          </label>
+
+          <label class="cursor-pointer">
+            <input
+              v-model="mode"
+              type="radio"
+              value="card"
+              class="peer sr-only"
+            />
+
+            <div
+              class="h-full rounded-sm border border-black p-4 transition peer-checked:bg-black peer-checked:text-white"
+            >
+              <h4
+                class="mb-1 text-sm font-bold"
+              >
+                Card View
+              </h4>
+
+              <p
+                class="text-xs normal-case tracking-normal"
+              >
+                Best for reviewing individual
+                rooms with more details and OCR.
+              </p>
+            </div>
+          </label>
+        </div>
+      </section>
+
+      <section
+        class="mb-6 border border-black bg-neutral-50 p-4"
       >
-        This building has no rooms.
-      </p>
+        <p
+          v-if="loading"
+          class="text-sm"
+        >
+          Loading rooms and meter history...
+        </p>
 
-      <p
-        v-else-if="rooms.length > 0"
-        class="room-count"
-      >
-        {{ rooms.length }}
-        {{ rooms.length === 1 ? 'room' : 'rooms' }}
-        available.
-      </p>
+        <p
+          v-else-if="
+            selectedBuildingId !== null &&
+            rooms.length === 0
+          "
+          class="text-sm"
+        >
+          This building has no rooms.
+        </p>
 
-      <button
-        type="button"
-        :disabled="
-          selectedBuildingId === null ||
-          loading ||
-          roomEntries.length === 0
-        "
-        @click="startRecording"
+        <div
+          v-else-if="rooms.length > 0"
+          class="flex items-center justify-between gap-4"
+        >
+          <span class="text-sm font-bold">
+            Available Rooms
+          </span>
+
+          <span
+            class="rounded-full border border-black px-3 py-1 text-xs font-bold"
+          >
+            {{ rooms.length }}
+            {{
+              rooms.length === 1
+                ? 'Room'
+                : 'Rooms'
+            }}
+          </span>
+        </div>
+
+        <p
+          v-else
+          class="text-sm text-gray-500"
+        >
+          Select a building to load rooms.
+        </p>
+      </section>
+
+      <footer
+        class="flex justify-end border-t border-black pt-4"
       >
-        Start Recording
-      </button>
+        <button
+          type="button"
+          :disabled="
+            selectedBuildingId === null ||
+            loading ||
+            roomEntries.length === 0
+          "
+          class="rounded-sm border border-black px-5 py-2 text-sm font-semibold transition hover:bg-black hover:text-white disabled:cursor-not-allowed disabled:border-gray-400 disabled:text-gray-400 disabled:hover:bg-white"
+          @click="startRecording"
+        >
+          Start Recording →
+        </button>
+      </footer>
     </section>
 
     <ListRecordingView
@@ -291,7 +444,9 @@ onMounted(loadBuildings)
         selectedBuildingId !== null
       "
       :building-id="selectedBuildingId"
-      :building-name="selectedBuilding.buildingName"
+      :building-name="
+        selectedBuilding.buildingName
+      "
       :entries="roomEntries"
       @cancel="stopRecording"
       @saved="handleSaved"
@@ -305,83 +460,12 @@ onMounted(loadBuildings)
         selectedBuildingId !== null
       "
       :building-id="selectedBuildingId"
-      :building-name="selectedBuilding.buildingName"
+      :building-name="
+        selectedBuilding.buildingName
+      "
       :entries="roomEntries"
       @cancel="stopRecording"
       @saved="handleSaved"
     />
   </main>
 </template>
-
-<style scoped>
-.meter-readings-page {
-  max-width: 1100px;
-  margin: 2rem auto;
-  padding: 1rem;
-}
-
-.page-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 1rem;
-  margin-bottom: 2rem;
-}
-
-.page-header h1 {
-  margin-bottom: 0.25rem;
-}
-
-.page-header p {
-  margin-top: 0;
-}
-
-.setup-card {
-  max-width: 560px;
-  padding: 1.5rem;
-  border: 1px solid #cccccc;
-  border-radius: 10px;
-}
-
-.form-group {
-  display: flex;
-  flex-direction: column;
-  gap: 0.4rem;
-  margin-bottom: 1rem;
-}
-
-.form-group select {
-  padding: 0.7rem;
-}
-
-.view-picker {
-  display: flex;
-  gap: 1.5rem;
-  margin-bottom: 1.25rem;
-  padding: 1rem;
-}
-
-.view-picker label {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-}
-
-button {
-  padding: 0.7rem 1rem;
-  cursor: pointer;
-}
-
-button:disabled {
-  cursor: not-allowed;
-  opacity: 0.6;
-}
-
-.error-message {
-  color: #b00020;
-}
-
-.room-count {
-  margin-bottom: 1rem;
-}
-</style>

@@ -2,6 +2,7 @@ package com.meterease.backend.entity;
 
 import com.meterease.backend.type.BillingMethod;
 import jakarta.persistence.*;
+import jakarta.validation.constraints.DecimalMax;
 import jakarta.validation.constraints.DecimalMin;
 import jakarta.validation.constraints.Min;
 import lombok.*;
@@ -34,9 +35,17 @@ public class BuildingSettings {
     private BillingMethod electricityBillingMethod;
 
     @DecimalMin("0.0")
+    @DecimalMax(
+    value = "999999.99",
+    message = "Electricity Fee cannot exceed 999,999.99."
+    )
     private BigDecimal electricityRatePerUnit;
 
     @DecimalMin("0.0")
+    @DecimalMax(
+    value = "999999.99",
+    message = "Electricity Fee cannot exceed 999,999.99."
+    )
     private BigDecimal electricityFlatFeeAmount;
 
     @Enumerated(EnumType.STRING)
@@ -44,9 +53,17 @@ public class BuildingSettings {
     private BillingMethod waterBillingMethod;
 
     @DecimalMin("0.0")
+    @DecimalMax(
+    value = "99999.0",
+    message = "Water Fee cannot exceed 99,999.0."
+    )
     private BigDecimal waterRatePerUnit;
 
     @DecimalMin("0.0")
+    @DecimalMax(
+    value = "99999.0",
+    message = "Water Fee cannot exceed 99,999.0."
+    )
     private BigDecimal waterFlatFeeAmount;
 
     @Min(1)
@@ -54,6 +71,10 @@ public class BuildingSettings {
     private Integer dueDatePeriodDays;
 
     @DecimalMin("0.0")
+    @DecimalMax(
+    value = "99999.0",
+    message = "Daily late fee cannot exceed 99,999.0."
+    )
     @Column(nullable = false)
     private BigDecimal dailyLateFeeAmount;
 }
